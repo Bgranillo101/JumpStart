@@ -19,6 +19,18 @@ public class Startup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    @ManyToMany
+    @JoinTable(
+            name = "startup_members",
+            joinColumns = @JoinColumn(name = "startup_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> members;
+
     @Column(nullable = false)
     private String name;
 
@@ -31,9 +43,6 @@ public class Startup {
     private String keyChallenges;
 
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TeamMember> teamMembers;
 
     @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnalysisResult> analysisResults;

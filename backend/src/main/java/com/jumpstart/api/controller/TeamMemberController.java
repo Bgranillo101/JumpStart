@@ -1,13 +1,13 @@
 package com.jumpstart.api.controller;
 
-import com.jumpstart.api.entity.TeamMember;
+import com.jumpstart.api.entity.User;
 import com.jumpstart.api.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/startups/{startupId}/members")
@@ -18,23 +18,23 @@ public class TeamMemberController {
     private final TeamMemberService teamMemberService;
 
     @PostMapping
-    public ResponseEntity<TeamMember> addMember(
+    public ResponseEntity<Void> addMember(
             @PathVariable Long startupId,
-            @RequestBody TeamMember member) {
-        TeamMember created = teamMemberService.addMember(startupId, member);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+            @RequestBody Map<String, Long> body) {
+        teamMemberService.addMember(startupId, body.get("userId"));
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<TeamMember>> getMembers(@PathVariable Long startupId) {
+    public ResponseEntity<List<User>> getMembers(@PathVariable Long startupId) {
         return ResponseEntity.ok(teamMemberService.getMembersByStartup(startupId));
     }
 
-    @DeleteMapping("/{memberId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> removeMember(
             @PathVariable Long startupId,
-            @PathVariable Long memberId) {
-        teamMemberService.removeMember(memberId);
+            @PathVariable Long userId) {
+        teamMemberService.removeMember(startupId, userId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,11 +1,13 @@
 package com.jumpstart.api.service;
 
 import com.jumpstart.api.entity.Startup;
-import com.jumpstart.api.entity.TeamMember;
+import com.jumpstart.api.entity.User;
 import com.jumpstart.api.exception.ResourceNotFoundException;
-import com.jumpstart.api.repository.TeamMemberRepository;
+import com.jumpstart.api.repository.StartupRepository;
+import com.jumpstart.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,29 +15,38 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamMemberService {
 
-    private final TeamMemberRepository teamMemberRepository;
-    private final StartupService startupService;
+    private final StartupRepository startupRepository;
+    private final UserRepository userRepository;
 
-    public TeamMember addMember(Long startupId, TeamMember member) {
-        if (member.getName() == null || member.getName().isBlank()) {
-            throw new IllegalArgumentException("Member name is required");
+    @Transactional
+    public Startup addMember(Long startupId, Long userId) {
+        Startup startup = startupRepository.findById(startupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Startup", startupId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        if (!startup.getMembers().contains(user)) {
+            startup.getMembers().add(user);
+            startupRepository.save(startup);
         }
-        if (member.getEmail() == null || member.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Member email is required");
-        }
-        Startup startup = startupService.getStartup(startupId);
-        member.setStartup(startup);
-        return teamMemberRepository.save(member);
+        return startup;
     }
 
-    public List<TeamMember> getMembersByStartup(Long startupId) {
-        startupService.getStartup(startupId);
-        return teamMemberRepository.findByStartupId(startupId);
+    public List<User> getMembersByStartup(Long startupId) {
+        if (!startupRepository.existsById(startupId)) {
+            throw new ResourceNotFoundException("Startup", startupId);
+        }
+        return userRepository.findByMemberStartupsId(startupId);
     }
 
-    public void removeMember(Long memberId) {
-        TeamMember member = teamMemberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMember", memberId));
-        teamMemberRepository.delete(member);
+    @Transactional
+    public void removeMember(Long startupId, Long userId) {
+        Startup startup = startupRepository.findById(startupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Startup", startupId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        startup.getMembers().remove(user);
+        startupRepository.save(startup);
     }
 }

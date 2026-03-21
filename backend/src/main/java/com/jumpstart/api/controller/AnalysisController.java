@@ -16,13 +16,11 @@ public class AnalysisController {
 
     @PostMapping
     public ResponseEntity<AnalysisResult> analyzeTeam(@PathVariable Long startupId) {
-        // TODO: implement — triggers Claude API call
         return ResponseEntity.ok(analysisService.analyzeTeam(startupId));
     }
 
     @GetMapping("/results")
     public ResponseEntity<AnalysisResult> getLatestResults(@PathVariable Long startupId) {
-        // TODO: implement
         return ResponseEntity.ok(analysisService.getLatestResult(startupId));
     }
 }

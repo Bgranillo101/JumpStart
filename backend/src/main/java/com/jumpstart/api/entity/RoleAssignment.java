@@ -21,8 +21,8 @@ public class RoleAssignment {
     private AnalysisResult analysisResult;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_member_id", nullable = false)
-    private TeamMember teamMember;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String assignedRole;

@@ -3,10 +3,10 @@ package com.jumpstart.api.service;
 import com.jumpstart.api.dto.*;
 import com.jumpstart.api.entity.Skill;
 import com.jumpstart.api.entity.Skill.SkillCategory;
-import com.jumpstart.api.entity.TeamMember;
+import com.jumpstart.api.entity.User;
 import com.jumpstart.api.exception.ResourceNotFoundException;
 import com.jumpstart.api.repository.SkillRepository;
-import com.jumpstart.api.repository.TeamMemberRepository;
+import com.jumpstart.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,30 +18,26 @@ import java.util.stream.Collectors;
 public class SkillHeatmapService {
 
     private final SkillRepository skillRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final UserRepository userRepository;
     private final StartupService startupService;
 
-    public MemberSkillHeatmapResponse getMemberHeatmap(Long startupId, Long memberId) {
+    public MemberSkillHeatmapResponse getMemberHeatmap(Long startupId, Long userId) {
         startupService.getStartup(startupId);
 
-        TeamMember member = teamMemberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMember", memberId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
-        if (!member.getStartup().getId().equals(startupId)) {
-            throw new ResourceNotFoundException("TeamMember", memberId);
-        }
-
-        List<Skill> skills = skillRepository.findByTeamMemberId(memberId);
+        List<Skill> skills = skillRepository.findByUserUserId(userId);
         List<SkillCategoryScore> scores = aggregateByCategory(skills);
 
-        return new MemberSkillHeatmapResponse(member.getId(), member.getName(), scores);
+        return new MemberSkillHeatmapResponse(user.getUserId(), user.getName(), scores);
     }
 
     public TeamSkillHeatmapResponse getTeamHeatmap(Long startupId) {
         startupService.getStartup(startupId);
 
-        List<TeamMember> members = teamMemberRepository.findByStartupId(startupId);
-        List<Skill> allSkills = skillRepository.findByTeamMemberStartupId(startupId);
+        List<User> members = userRepository.findByMemberStartupsId(startupId);
+        List<Skill> allSkills = skillRepository.findByUserMemberStartupsId(startupId);
         List<SkillCategoryScore> scores = aggregateByCategory(allSkills);
 
         return new TeamSkillHeatmapResponse(startupId, members.size(), scores);
