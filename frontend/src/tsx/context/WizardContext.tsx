@@ -4,16 +4,23 @@ import type { WizardPath, WizardState } from '../types';
 interface WizardContextValue {
   state: WizardState;
   setPath: (path: WizardPath) => void;
-  setProfileField: (field: keyof Omit<WizardState, 'path'>, value: string | string[] | File | null) => void;
+  setProfileField: (
+    field: keyof Omit<WizardState, 'path'>,
+    value: string | string[] | File | null
+  ) => void;
   reset: () => void;
 }
 
 const defaultState: WizardState = {
   path: null,
+  username: '',
+  email: '',
+  password: '',
   profileName: '',
   profileRole: '',
   profileSkills: [],
   resumeFile: null,
+  companyName: '',
   teamCode: '',
 };
 

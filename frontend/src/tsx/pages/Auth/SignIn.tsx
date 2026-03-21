@@ -1,21 +1,41 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/buttons';
 import { Input } from '../../components/Input';
-import { login } from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import { login, decodeJwt } from '../../api';
 import '../../../css/auth.css';
 
 export default function SignIn() {
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    await login(email, password);
+    const result = await login(username, password);
     setLoading(false);
-    window.location.href = '/dashboard';
+
+    if (!result.success || !result.token) {
+      setError(result.error ?? 'Sign in failed.');
+      return;
+    }
+
+    const { userId, sub } = decodeJwt(result.token);
+    const startupId = localStorage.getItem('startupId');
+
+    authLogin(
+      { userId, username: sub, email: '', skills: [] },
+      result.token,
+      startupId ? parseInt(startupId) : undefined
+    );
+
+    navigate('/dashboard');
   };
 
   return (
@@ -26,11 +46,11 @@ export default function SignIn() {
 
         <form onSubmit={handleSubmit}>
           <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            label="Username"
+            type="text"
+            placeholder="janedoe"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
             required
           />
           <Input
@@ -41,6 +61,7 @@ export default function SignIn() {
             onChange={e => setPassword(e.target.value)}
             required
           />
+          {error && <p style={{ color: 'var(--accent-secondary)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{error}</p>}
           <Button type="submit" variant="primary" size="lg" fullWidth disabled={loading}>
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
