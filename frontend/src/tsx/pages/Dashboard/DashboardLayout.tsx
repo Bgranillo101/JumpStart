@@ -15,10 +15,10 @@ import type { Startup, User, AnalysisResult, SkillData } from '../../types';
 import '../../../css/dashboard.css';
 
 const NAV_LINKS = [
-  { icon: '⬡', label: 'Overview',   id: 'overview'  },
-  { icon: '👥', label: 'Team',       id: 'team'       },
-  { icon: '⚡', label: 'Analysis',   id: 'analysis'   },
-  { icon: '⚙', label: 'Settings',   id: 'settings'   },
+  { icon: '⬡', label: 'Overview', id: 'overview' },
+  { icon: '👥', label: 'Team', id: 'team' },
+  { icon: '⚡', label: 'Analysis', id: 'analysis' },
+  { icon: '⚙', label: 'Settings', id: 'settings' },
 ];
 
 export default function DashboardLayout() {
@@ -35,8 +35,8 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     if (!startupId) return;
-    getTeam(startupId).then(setStartup).catch(() => {});
-    getMembers(startupId).then(setMembers).catch(() => {});
+    getTeam(startupId).then(setStartup).catch(() => { });
+    getMembers(startupId).then(setMembers).catch(() => { });
     getTeamHeatmap(startupId)
       .then(h => setHeatmapData(
         h.categories.map(c => ({
@@ -45,8 +45,8 @@ export default function DashboardLayout() {
           fullMark: 10,
         }))
       ))
-      .catch(() => {});
-    getAnalysisResults(startupId).then(setAnalysis).catch(() => {});
+      .catch(() => { });
+    getAnalysisResults(startupId).then(setAnalysis).catch(() => { });
   }, [startupId]);
 
   const handleRunAnalysis = async () => {
