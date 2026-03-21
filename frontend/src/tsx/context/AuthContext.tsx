@@ -3,20 +3,52 @@ import type { User } from '../types';
 
 interface AuthContextValue {
   currentUser: User | null;
-  login: (user: User) => void;
+  startupId: number | null;
+  login: (user: User, token: string, startupId?: number) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+function hydrateUser(): User | null {
+  try {
+    const raw = localStorage.getItem('currentUser');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
-  const login = (user: User) => setCurrentUser(user);
-  const logout = () => setCurrentUser(null);
+function hydrateStartupId(): number | null {
+  const raw = localStorage.getItem('startupId');
+  return raw ? parseInt(raw) : null;
+}
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(hydrateUser);
+  const [startupId, setStartupId] = useState<number | null>(hydrateStartupId);
+
+  const login = (user: User, token: string, sid?: number) => {
+    localStorage.setItem('jwt', token);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    if (sid != null) {
+      localStorage.setItem('startupId', String(sid));
+      setStartupId(sid);
+    }
+    setCurrentUser(user);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('startupId');
+    localStorage.removeItem('userId');
+    setCurrentUser(null);
+    setStartupId(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, startupId, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

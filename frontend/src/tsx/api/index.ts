@@ -1,102 +1,170 @@
-import type { TechStackItem, TeamMember, SkillData, Company } from '../types';
+import type { Startup, User, AnalysisResult, TeamSkillHeatmap, SkillData, Skill } from '../types';
 
-// ─── Mock data ─────────────────────────────────────────────────────────────
+const BASE_URL = 'http://localhost:8080/api';
 
-const MOCK_TECH_STACK: TechStackItem[] = [
-  { name: 'React', category: 'Frontend', reason: 'Best fit for your team\'s JS expertise' },
-  { name: 'TypeScript', category: 'Language', reason: 'Type safety across frontend and backend' },
-  { name: 'Spring Boot', category: 'Backend', reason: 'Matches your Java skill set' },
-  { name: 'PostgreSQL', category: 'Database', reason: 'Reliable relational DB for structured data' },
-  { name: 'Docker', category: 'DevOps', reason: 'Simplifies deployment and environment parity' },
-  { name: 'Railway', category: 'Hosting', reason: 'Easy zero-config deployment for early stage' },
-];
-
-const MOCK_MEMBERS: TeamMember[] = [
-  { id: '1', name: 'Alex Rivera',   role: 'Full Stack',      skills: ['React', 'Java', 'SQL'] },
-  { id: '2', name: 'Jordan Lee',    role: 'Product Manager', skills: ['Roadmapping', 'Analytics', 'UX'] },
-  { id: '3', name: 'Sam Patel',     role: 'Backend',         skills: ['Spring Boot', 'Docker', 'AWS'] },
-  { id: '4', name: 'Casey Morgan',  role: 'Designer',        skills: ['Figma', 'CSS', 'Prototyping'] },
-];
-
-const MOCK_SKILL_DATA: Record<string, SkillData[]> = {
-  '1': [
-    { subject: 'Frontend',  value: 85 },
-    { subject: 'Backend',   value: 75 },
-    { subject: 'DevOps',    value: 50 },
-    { subject: 'Design',    value: 30 },
-    { subject: 'Product',   value: 40 },
-  ],
-  '2': [
-    { subject: 'Frontend',  value: 20 },
-    { subject: 'Backend',   value: 15 },
-    { subject: 'DevOps',    value: 20 },
-    { subject: 'Design',    value: 65 },
-    { subject: 'Product',   value: 95 },
-  ],
-  '3': [
-    { subject: 'Frontend',  value: 30 },
-    { subject: 'Backend',   value: 90 },
-    { subject: 'DevOps',    value: 80 },
-    { subject: 'Design',    value: 15 },
-    { subject: 'Product',   value: 35 },
-  ],
-  '4': [
-    { subject: 'Frontend',  value: 70 },
-    { subject: 'Backend',   value: 10 },
-    { subject: 'DevOps',    value: 15 },
-    { subject: 'Design',    value: 95 },
-    { subject: 'Product',   value: 55 },
-  ],
-};
-
-const MOCK_COMPANIES: Company[] = [
-  { id: 'c1', name: 'NovaSpark',  memberCount: 4, description: 'AI-powered analytics platform',     teamCode: 'NOVA01' },
-  { id: 'c2', name: 'BuildFlow',  memberCount: 3, description: 'No-code workflow automation',        teamCode: 'BFLO22' },
-  { id: 'c3', name: 'GreenRoute', memberCount: 6, description: 'Sustainable logistics optimization', teamCode: 'GRN99' },
-];
-
-// ─── Placeholder API functions ──────────────────────────────────────────────
-
-export async function getTechStack(): Promise<TechStackItem[]> {
-  await delay(400);
-  return MOCK_TECH_STACK;
+function authHeaders(): HeadersInit {
+  const token = localStorage.getItem('jwt');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
-export async function getMembers(): Promise<TeamMember[]> {
-  await delay(350);
-  return MOCK_MEMBERS;
+/** Decode the JWT payload without a library */
+export function decodeJwt(token: string): { userId: number; sub: string } {
+  const payload = token.split('.')[1];
+  return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
 }
 
-export async function getMemberSkills(memberId: string): Promise<SkillData[]> {
-  await delay(300);
-  return MOCK_SKILL_DATA[memberId] ?? [];
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export async function login(
+  username: string,
+  password: string
+): Promise<{ success: boolean; token?: string; error?: string }> {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) return { success: false, error: 'Invalid username or password.' };
+  const token = await res.text();
+  localStorage.setItem('jwt', token);
+  const { userId } = decodeJwt(token);
+  localStorage.setItem('userId', String(userId));
+  return { success: true, token };
 }
 
-export async function searchCompanies(query: string): Promise<Company[]> {
-  await delay(300);
+export async function registerUser(data: {
+  username: string;
+  email: string;
+  password: string;
+}): Promise<{ id: number; username: string; email: string }> {
+  const res = await fetch(`${BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || 'Registration failed');
+  }
+  return res.json();
+}
+
+// ─── Startups ────────────────────────────────────────────────────────────────
+
+export async function createStartup(data: {
+  name: string;
+  productDescription?: string;
+  businessModel?: string;
+  keyChallenges?: string;
+  owner: { userId: number };
+}): Promise<Startup> {
+  const res = await fetch(`${BASE_URL}/startups`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create startup');
+  return res.json();
+}
+
+export async function getTeam(startupId: number): Promise<Startup> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Startup not found');
+  return res.json();
+}
+
+export async function getAllStartups(): Promise<Startup[]> {
+  const res = await fetch(`${BASE_URL}/startups`, { headers: authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch startups');
+  return res.json();
+}
+
+export async function searchCompanies(query: string): Promise<Startup[]> {
+  const all = await getAllStartups();
   const q = query.toLowerCase();
-  return MOCK_COMPANIES.filter(
-    c => c.name.toLowerCase().includes(q) || c.teamCode?.toLowerCase().includes(q)
+  return all.filter(s => s.name.toLowerCase().includes(q));
+}
+
+// ─── Members ─────────────────────────────────────────────────────────────────
+
+export async function getMembers(startupId: number): Promise<User[]> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/members`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch members');
+  return res.json();
+}
+
+export async function addMember(startupId: number, userId: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/members`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ userId }),
+  });
+  if (!res.ok) throw new Error('Failed to add member');
+}
+
+// ─── Skills ──────────────────────────────────────────────────────────────────
+
+export async function addSkills(userId: number, skills: Skill[]): Promise<Skill[]> {
+  const res = await fetch(`${BASE_URL}/users/${userId}/skills`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(skills),
+  });
+  if (!res.ok) throw new Error('Failed to save skills');
+  return res.json();
+}
+
+// ─── Analysis ────────────────────────────────────────────────────────────────
+
+export async function runAnalysis(startupId: number): Promise<AnalysisResult> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/analyze`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Analysis failed');
+  return res.json();
+}
+
+export async function getAnalysisResults(startupId: number): Promise<AnalysisResult | null> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/analyze/results`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// ─── Heatmap ─────────────────────────────────────────────────────────────────
+
+export async function getTeamHeatmap(startupId: number): Promise<TeamSkillHeatmap> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/skill-heatmap`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch heatmap');
+  return res.json();
+}
+
+export async function getMemberSkills(startupId: number, memberId: number): Promise<SkillData[]> {
+  const res = await fetch(
+    `${BASE_URL}/startups/${startupId}/members/${memberId}/skill-heatmap`,
+    { headers: authHeaders() }
   );
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.categories ?? []).map((c: { category: string; averageProficiency: number }) => ({
+    subject: c.category,
+    value: Math.round(c.averageProficiency * 10), // scale 0–10 → 0–100
+    fullMark: 100,
+  }));
 }
 
+// Keep old register signature for any call sites that haven't been updated yet
 export async function register(_data: object): Promise<{ success: boolean }> {
-  await delay(600);
   return { success: true };
-}
-
-export async function login(_email: string, _password: string): Promise<{ success: boolean }> {
-  await delay(500);
-  return { success: true };
-}
-
-export async function getTeam(): Promise<{ company: Company; members: TeamMember[] }> {
-  await delay(400);
-  return { company: MOCK_COMPANIES[0], members: MOCK_MEMBERS };
-}
-
-// ─── Util ───────────────────────────────────────────────────────────────────
-
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
