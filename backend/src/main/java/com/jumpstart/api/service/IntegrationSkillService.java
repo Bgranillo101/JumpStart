@@ -19,7 +19,7 @@ public class IntegrationSkillService {
 
     public List<Skill> addSkills(Long userId, List<Skill> skills) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         for (Skill skill : skills) {
             skill.setUser(user);
@@ -30,6 +30,6 @@ public class IntegrationSkillService {
 
     public User getUserWithSkills(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
 }
