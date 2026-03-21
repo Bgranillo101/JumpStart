@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,7 +30,7 @@ public class Startup {
             joinColumns = @JoinColumn(name = "startup_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> members;
+    private List<User> members = new ArrayList<>();
 
     @Column(nullable = false)
     private String name;
@@ -45,7 +46,7 @@ public class Startup {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AnalysisResult> analysisResults;
+    private List<AnalysisResult> analysisResults = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

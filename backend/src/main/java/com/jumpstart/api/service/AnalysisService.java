@@ -3,6 +3,7 @@ package com.jumpstart.api.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jumpstart.api.entity.*;
+import com.jumpstart.api.exception.ResourceNotFoundException;
 import com.jumpstart.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class AnalysisService {
     @Transactional
     public AnalysisResult analyzeTeam(Long startupId) {
         Startup startup = startupRepository.findById(startupId)
-                .orElseThrow(() -> new RuntimeException("Startup not found: " + startupId));
+                .orElseThrow(() -> new ResourceNotFoundException("Startup", startupId));
 
         String prompt = buildPrompt(startup);
         String rawResponse = claudeApiService.analyzeTeam(prompt);
