@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 :root {
   /* Brand Palette */
-  --bg-primary: #2E2E28;
-  --bg-secondary: #2E2E28;
+  --bg-primary: #1a1a1d;
+  --bg-secondary: #1a1a1d;
   --bg-card: rgba(255, 255, 255, 0.04);
   --bg-glass: rgba(255, 255, 255, 0.06);
   --bg-glass-border: rgba(228, 225, 221, 0.12);
@@ -12,15 +12,15 @@
   --text-secondary: #9a9690;
   --text-muted: #6b6865;
 
-  --accent-primary: #ffdd00;    /* Primary Brand */
-  --accent-secondary: #f2ae00;  /* Secondary Brand */
-  --accent-tertiary: #313e68;   /* Tertiary */
+  --accent-primary: #ffdd00; /* Primary Brand */
+  --accent-secondary: #f2ae00; /* Secondary Brand */
+  --accent-tertiary: #313e68; /* Tertiary */
   --accent-success: #22c55e;
   --accent-warning: #f59e0b;
   --accent-error: #ef4444;
 
   /* Typography */
-  --font-family: 'Inter', sans-serif;
+  --font-family: "Inter", sans-serif;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -76,7 +76,11 @@ body {
 
 /* Brand gradient text utility */
 .brand-gradient {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
