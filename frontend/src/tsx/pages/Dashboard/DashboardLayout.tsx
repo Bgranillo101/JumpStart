@@ -10,6 +10,7 @@ import { Button } from '../../components/buttons';
 import { useAuth } from '../../context/AuthContext';
 import {
   getTeam, getMembers, getTeamHeatmap, getAnalysisResults, runAnalysis,
+  generateInviteLink,
 } from '../../api';
 import type { Startup, User, AnalysisResult, SkillData } from '../../types';
 import '../../../css/dashboard.css';
@@ -33,6 +34,8 @@ export default function DashboardLayout() {
   const [analyzing, setAnalyzing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   useEffect(() => {
     if (!startupId) {
@@ -97,6 +100,25 @@ export default function DashboardLayout() {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const isOwner = currentUser && startup && currentUser.userId === startup.owner.userId;
+
+  const handleGenerateInvite = async () => {
+    if (!startupId) return;
+    try {
+      const link = await generateInviteLink(startupId);
+      setInviteLink(link);
+      setInviteCopied(false);
+    } catch {
+      setError('Failed to generate invite link.');
+    }
+  };
+
+  const handleCopyInvite = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 2000);
   };
 
   return (
@@ -240,6 +262,46 @@ export default function DashboardLayout() {
 
         {/* ── Team ─────────────────────────────────────────────────────────── */}
         {!loading && activeSection === 'team' && (
+          <>
+            {isOwner && (
+              <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <p className="dash-section-title">Invite Members</p>
+                {!inviteLink ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+                      Generate a shareable link to invite people to your team.
+                    </p>
+                    <Button variant="primary" size="md" onClick={handleGenerateInvite}>
+                      Generate Invite Link
+                    </Button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+                      Share this link with people you want to invite:
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <code style={{
+                        flex: 1,
+                        padding: '0.6rem 1rem',
+                        background: 'var(--bg-glass)',
+                        border: '1px solid var(--bg-glass-border)',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        color: 'var(--text-primary)',
+                        wordBreak: 'break-all',
+                      }}>
+                        {inviteLink}
+                      </code>
+                      <Button variant="outline" size="sm" onClick={handleCopyInvite}>
+                        {inviteCopied ? 'Copied!' : 'Copy'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           <div className="dash-section-card">
             <p className="dash-section-title">Team Members</p>
             <div className="members-list">
@@ -263,6 +325,7 @@ export default function DashboardLayout() {
               )}
             </div>
           </div>
+          </>
         )}
 
         {/* ── Analysis ─────────────────────────────────────────────────────── */}

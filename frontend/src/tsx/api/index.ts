@@ -196,6 +196,26 @@ export async function getMemberSkills(startupId: number, memberId: number): Prom
   }));
 }
 
+// ─── Invites ─────────────────────────────────────────────────────────────────
+
+export async function generateInviteLink(startupId: number): Promise<string> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/invite`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to generate invite link');
+  return res.text();
+}
+
+export async function joinByInviteCode(code: string): Promise<Startup> {
+  const res = await fetch(`${BASE_URL}/startups/join/${code}`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Invalid or expired invite code');
+  return res.json();
+}
+
 // Keep old register signature for any call sites that haven't been updated yet
 export async function register(_data: object): Promise<{ success: boolean }> {
   return { success: true };

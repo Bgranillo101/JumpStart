@@ -6,6 +6,7 @@ import SignIn from './pages/Auth/SignIn';
 import Register from './pages/Auth/Register';
 import CreateProfile from './pages/Auth/CreateProfile';
 import JoinTeam from './pages/Auth/JoinTeam';
+import JoinByInvite from './pages/Auth/JoinByInvite';
 import DashboardLayout from './pages/Dashboard/DashboardLayout';
 import { useAuth } from './context/AuthContext';
 
@@ -30,6 +31,7 @@ function AppContent() {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/create-profile" element={<CreateProfile />} />
         <Route path="/auth/join-team" element={<JoinTeam />} />
+        <Route path="/join" element={<JoinByInvite />} />
         <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>} />
       </Routes>
     </>

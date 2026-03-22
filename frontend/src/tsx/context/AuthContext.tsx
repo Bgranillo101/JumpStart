@@ -4,6 +4,7 @@ import type { User } from '../types';
 interface AuthContextValue {
   currentUser: User | null;
   startupId: number | null;
+  setStartupId: (id: number) => void;
   login: (user: User, token: string, startupId?: number) => void;
   logout: () => void;
 }
@@ -48,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, startupId, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, startupId, setStartupId: (id: number) => { localStorage.setItem('startupId', String(id)); setStartupId(id); }, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

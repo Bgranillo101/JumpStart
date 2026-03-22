@@ -23,6 +23,7 @@ export interface Startup {
   productDescription?: string;
   businessModel?: string;
   keyChallenges?: string;
+  inviteCode?: string;
   owner: User;
   members: User[];
 }
