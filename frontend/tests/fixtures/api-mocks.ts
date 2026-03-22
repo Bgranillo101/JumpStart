@@ -46,6 +46,21 @@ export const MOCK_MEMBERS = MOCK_STARTUP.members;
 export const MOCK_HEATMAP = {
   startupId: 1,
   memberCount: 2,
+  aiGenerated: true,
+  categories: [
+    { category: 'TECHNICAL', averageProficiency: 8.2, skillCount: 2, insight: 'Strong React and TypeScript skills align well with your SaaS platform.' },
+    { category: 'DESIGN', averageProficiency: 8.5, skillCount: 1, insight: 'Solid Figma expertise covers UI needs but consider UX research depth.' },
+    { category: 'MARKETING', averageProficiency: 1.0, skillCount: 0, insight: 'Critical gap — no marketing skills for go-to-market strategy.' },
+    { category: 'SALES', averageProficiency: 0.5, skillCount: 0, insight: 'No sales capability; essential for SaaS customer acquisition.' },
+    { category: 'OPERATIONS', averageProficiency: 1.5, skillCount: 0, insight: 'Lacking ops skills for scaling infrastructure.' },
+    { category: 'DOMAIN', averageProficiency: 3.0, skillCount: 0, insight: 'Limited domain expertise in AI/testing space.' },
+  ],
+};
+
+export const MOCK_HEATMAP_NO_AI = {
+  startupId: 1,
+  memberCount: 2,
+  aiGenerated: false,
   categories: [
     { category: 'TECHNICAL', averageProficiency: 7.5, skillCount: 2 },
     { category: 'DESIGN', averageProficiency: 9.0, skillCount: 1 },

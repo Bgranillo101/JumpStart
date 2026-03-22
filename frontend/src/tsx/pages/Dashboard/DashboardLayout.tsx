@@ -48,6 +48,7 @@ export default function DashboardLayout() {
   const [startup, setStartup] = useState<Startup | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [heatmapData, setHeatmapData] = useState<SkillData[]>([]);
+  const [aiHeatmap, setAiHeatmap] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -77,11 +78,13 @@ export default function DashboardLayout() {
     // Re-fetch members and heatmap
     getMembers(startupId).then(setMembers).catch(() => {});
     getTeamHeatmap(startupId).then(h => {
+      setAiHeatmap(h.aiGenerated ?? false);
       setHeatmapData(
         h.categories.map(c => ({
           subject: c.category,
           value: parseFloat(c.averageProficiency.toFixed(1)),
           fullMark: 10,
+          insight: c.insight,
         }))
       );
     }).catch(() => {});
@@ -114,11 +117,13 @@ export default function DashboardLayout() {
       }
 
       if (heatmapResult.status === 'fulfilled') {
+        setAiHeatmap(heatmapResult.value.aiGenerated ?? false);
         setHeatmapData(
           heatmapResult.value.categories.map(c => ({
             subject: c.category,
             value: parseFloat(c.averageProficiency.toFixed(1)),
             fullMark: 10,
+            insight: c.insight,
           }))
         );
       }
@@ -359,7 +364,20 @@ export default function DashboardLayout() {
             )}
             {heatmapData.length > 0 && (
               <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }} ref={heatmapRef}>
-                <p className="dash-section-title">Team Skill Heatmap</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <p className="dash-section-title" style={{ margin: 0 }}>Team Skill Heatmap</p>
+                  {aiHeatmap && (
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '9999px',
+                      background: 'rgba(255, 221, 0, 0.15)',
+                      color: '#ffdd00',
+                      border: '1px solid rgba(255, 221, 0, 0.3)',
+                    }}>AI-Enhanced</span>
+                  )}
+                </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={heatmapData}>
                     <PolarGrid stroke="rgba(255,255,255,0.1)" />
@@ -367,7 +385,13 @@ export default function DashboardLayout() {
                     <Radar name="Team" dataKey="value" stroke="#ffdd00" fill="#ffdd00" fillOpacity={0.25} />
                     <Tooltip
                       contentStyle={{ background: 'var(--bg-glass)', border: '1px solid var(--bg-glass-border)', borderRadius: '8px' }}
-                      formatter={(v) => [`${v} / 10`, 'Avg Proficiency']}
+                      formatter={(v: number, _name: string, props: { payload?: SkillData }) => {
+                        const insight = props.payload?.insight;
+                        return [
+                          insight ? `${v} / 10 — ${insight}` : `${v} / 10`,
+                          aiHeatmap ? 'AI Score' : 'Avg Proficiency',
+                        ];
+                      }}
                     />
                   </RadarChart>
                 </ResponsiveContainer>

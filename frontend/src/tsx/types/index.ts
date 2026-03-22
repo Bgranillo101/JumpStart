@@ -58,18 +58,21 @@ export interface SkillCategoryScore {
   category: string;
   averageProficiency: number;
   skillCount: number;
+  insight?: string;
 }
 
 export interface TeamSkillHeatmap {
   startupId: number;
   memberCount: number;
   categories: SkillCategoryScore[];
+  aiGenerated?: boolean;
 }
 
 export interface SkillData {
   subject: string;
   value: number;
   fullMark?: number;
+  insight?: string;
 }
 
 export interface TechStackRecommendation {
