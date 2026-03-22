@@ -7,17 +7,22 @@ A reference document for frontend developers integrating against the JumpStart S
 ## Tech Stack
 
 - **Framework:** Spring Boot 3.2.3 / Java 17
-- **Database:** PostgreSQL (`localhost:5432/JumpStart_database`)
-- **Auth:** JWT (HmacSHA256) + BCrypt
+- **Database:** PostgreSQL (Render hosted)
+- **Auth:** JWT (HmacSHA512) + BCrypt (strength 12)
 - **AI:** Claude API (`claude-opus-4-6`) via `ClaudeApiService`
-- **Port:** `8080`
+- **Port:** `${PORT:8080}` (configurable via env var)
 - **API Base Path:** `/api`
+- **Deployment:** Docker on Render (free tier)
+- **Frontend:** GitHub Pages at `vondracs.github.io/JumpStart/`
 
 **Required environment variables:**
 ```
-DB_USERNAME=<postgres username>
-DB_PASSWORD=<postgres password>
+DATABASE_URL=jdbc:postgresql://<host>/<db>
+PGUSER=<postgres username>
+PGPASSWORD=<postgres password>
 CLAUDE_API_KEY=<anthropic api key>
+JWT_SECRET=<base64-encoded secret>
+PORT=8080
 ```
 
 ---
@@ -32,10 +37,12 @@ Authorization: Bearer <token>
 ```
 
 **Token details:**
-- Algorithm: HmacSHA256
+- Algorithm: HmacSHA512
 - Expiration: 24 hours
 - Claims: `userId` (Long), `username` (String subject)
-- Secret key is generated fresh each server startup (tokens do not persist across restarts)
+- Secret key from `JWT_SECRET` env var (persists across restarts)
+
+**CORS:** Configured in `SecurityConfig` to allow origins `https://vondracs.github.io` and `http://localhost:5173`. Preflight OPTIONS requests are permitted through the JWT filter.
 
 ---
 
@@ -63,7 +70,8 @@ Register a new user account.
 ```
 
 **Errors:**
-- `400` — missing fields, invalid email, duplicate username/email
+- `400` — missing fields, invalid email
+- `403` — duplicate username/email
 
 ---
 
@@ -80,11 +88,11 @@ Login and receive a JWT token.
 
 **Response `200`:** Plain JWT string (not JSON)
 ```
-eyJhbGciOiJIUzI1NiJ9...
+eyJhbGciOiJIUzUxMiJ9...
 ```
 
 **Errors:**
-- `401` — invalid credentials
+- `403` — invalid credentials
 
 ---
 
@@ -169,7 +177,7 @@ Add an existing user to a startup's team.
 ### `GET /api/startups/{startupId}/members`
 Get all members of a startup.
 
-**Response `200`:** Array of User objects (full profile including skills and role assignments)
+**Response `200`:** Array of User objects (full profile including skills)
 
 ---
 
@@ -178,6 +186,53 @@ Remove a member from a startup.
 
 **Response `204`**
 **Errors:** `404`
+
+---
+
+## User Endpoints
+
+### `GET /api/users/{userId}`
+Get a user with their skills.
+
+**Response `200`:** User object with skills array
+
+---
+
+### `PATCH /api/users/{userId}`
+Update a user's profile fields.
+
+**Request body:**
+```json
+{
+  "name": "string (optional)",
+  "preferredRole": "string (optional)"
+}
+```
+
+**Response `200`:** Updated User object
+
+---
+
+### `GET /api/users/{userId}/startup`
+Find the startup a user owns or is a member of.
+
+**Response `200`:** Startup object (if found)
+**Response `204`:** No startup found (no body)
+
+---
+
+### `POST /api/users/{userId}/skills`
+Add skills to a user. Replaces/adds to existing skills.
+
+**Request body:**
+```json
+[
+  { "name": "React", "category": "TECHNICAL", "proficiencyLevel": 8 },
+  { "name": "Figma", "category": "DESIGN", "proficiencyLevel": 6 }
+]
+```
+
+**Response `200`:** Array of saved Skill objects
 
 ---
 
@@ -196,8 +251,7 @@ Trigger AI analysis of the startup team. No request body needed.
 ```json
 {
   "id": 1,
-  "startup": { "id": 1, "name": "Acme" },
-  "skillHeatmap": "{\"TECHNICAL\": 8, \"DESIGN\": 5, \"MARKETING\": 6, \"SALES\": 7, \"OPERATIONS\": 4, \"DOMAIN\": 6}",
+  "skillHeatmap": "{\"TECHNICAL\": 8, \"DESIGN\": 5}",
   "createdAt": "2026-03-21T14:00:00",
   "roleAssignments": [
     {
@@ -225,6 +279,7 @@ Trigger AI analysis of the startup team. No request body needed.
 - `skillHeatmap` is a JSON string — parse it with `JSON.parse()`
 - `responsibilities` and `skillsToLookFor` are JSON strings — parse them with `JSON.parse()`
 - `importance` values: `CRITICAL` | `RECOMMENDED` | `NICE_TO_HAVE`
+- `startup` back-reference is `@JsonIgnore`d (not in response)
 
 **Errors:**
 - `404` — startup not found
@@ -235,7 +290,7 @@ Trigger AI analysis of the startup team. No request body needed.
 ### `GET /api/startups/{startupId}/analyze/results`
 Get the most recent analysis result for a startup.
 
-**Response `200`:** Same AnalysisResult shape as above, or `null` if no analysis has been run.
+**Response `200`:** Same AnalysisResult shape as above, or empty/null if no analysis has been run.
 
 ---
 
@@ -289,10 +344,11 @@ Get skill scores for a single team member.
   "availabilityLevel": "FULL_TIME",
   "education": "CS @ MIT",
   "createdAt": "2026-03-21T14:00:00",
-  "skills": [ ...Skill[] ],
-  "roleAssignments": [ ...RoleAssignment[] ]
+  "skills": [ ...Skill[] ]
 }
 ```
+
+**Note:** `password` is `@JsonIgnore`d — never included in API responses. `ownedStartups`, `memberStartups`, and `roleAssignments` are also `@JsonIgnore`d to prevent circular references.
 
 ### Startup
 ```json
@@ -304,10 +360,11 @@ Get skill scores for a single team member.
   "keyChallenges": "Finding PMF",
   "createdAt": "2026-03-21T14:00:00",
   "owner": { ...User },
-  "members": [ ...User[] ],
-  "analysisResults": [ ...AnalysisResult[] ]
+  "members": [ ...User[] ]
 }
 ```
+
+**Note:** `analysisResults` is `@JsonIgnore`d. `owner` and `members` are EAGER-fetched.
 
 ### Skill
 ```json
@@ -318,6 +375,8 @@ Get skill scores for a single team member.
   "proficiencyLevel": 9
 }
 ```
+
+**Note:** `user` back-reference is `@JsonIgnore`d.
 
 ### RoleAssignment
 ```json
@@ -331,6 +390,8 @@ Get skill scores for a single team member.
 }
 ```
 
+**Note:** `analysisResult` back-reference is `@JsonIgnore`d.
+
 ### RoleGap
 ```json
 {
@@ -341,6 +402,8 @@ Get skill scores for a single team member.
   "skillsToLookFor": "[\"SEO\", \"Growth marketing\"]"
 }
 ```
+
+**Note:** `analysisResult` back-reference is `@JsonIgnore`d.
 
 ---
 
@@ -364,21 +427,15 @@ FULL_TIME | PART_TIME | ADVISORY
 
 ---
 
-## CORS
-
-All controllers have `@CrossOrigin(origins = "*")`. The frontend can make requests from any origin without a proxy.
-
----
-
 ## Error Handling
 
 | Status | Meaning |
 |--------|---------|
 | `200` | Success |
 | `201` | Resource created |
-| `204` | Success, no body (DELETE) |
-| `400` | Validation error or duplicate data |
-| `401` | Missing/invalid JWT or wrong credentials |
+| `204` | Success, no body (DELETE, or no startup found for user) |
+| `400` | Validation error |
+| `403` | Duplicate data, invalid credentials, or missing/invalid JWT |
 | `404` | Resource not found — message: `"{Resource} not found with id: {id}"` |
 | `500` | Claude response parse failure |
 
@@ -386,27 +443,29 @@ All controllers have `@CrossOrigin(origins = "*")`. The frontend can make reques
 
 ## Integration Flows
 
-### 1. Registration & Login
+### 1. Registration & Profile Creation
 ```
-POST /api/auth/register → store user.id
-POST /api/auth/login    → store JWT in localStorage
-```
-Include JWT on every subsequent request: `Authorization: Bearer <token>`
-
-### 2. Create Startup
-```
-POST /api/startups  { name, productDescription, businessModel, keyChallenges, owner: { userId } }
-→ store startup.id
+POST /api/auth/register         → creates user account
+POST /api/auth/login            → returns JWT, store in localStorage
+PATCH /api/users/{userId}       → save name, preferredRole
+POST /api/startups              → create startup with owner
+POST /api/users/{userId}/skills → save user skills
 ```
 
-### 3. Add Team Members
+### 2. Sign In (existing user)
 ```
-POST /api/startups/{startupId}/members  { userId }
+POST /api/auth/login            → returns JWT
+GET  /api/users/{userId}        → fetch full user profile
+GET  /api/users/{userId}/startup → discover user's startup
 ```
-Users must already be registered. Skills are attached to Users, not to startup membership.
 
-> **Note:** There is currently no REST endpoint for adding/editing Skills on a User.
-> Skills are seeded directly in the database or need a new endpoint to be built.
+### 3. Join Existing Startup
+```
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/startups              → search/browse startups
+POST /api/startups/{id}/members → join a startup
+```
 
 ### 4. Run Analysis
 ```
@@ -428,11 +487,73 @@ GET /api/startups/{startupId}/skill-heatmap
 
 ---
 
-## Known Gaps (Missing Endpoints)
+## Deployment
 
-| Missing Feature | Status |
-|----------------|--------|
-| Add/edit/delete User skills | No endpoint — needs to be built |
-| Update User profile (name, headline, role, etc.) | No endpoint — needs to be built |
-| Join startup by invite code | No invite code system exists yet |
-| List startups a user belongs to | No dedicated endpoint — filter from `GET /api/startups` |
+### Backend (Render — Docker)
+- **Repo:** `vondraCS/JumpStart`
+- **Root Directory:** `backend`
+- **Runtime:** Docker (uses `backend/Dockerfile`)
+- **Dockerfile:** Multi-stage build with Maven 3.9 + Eclipse Temurin JDK 17
+- **Free tier:** Cold starts (~30-50s after 15min inactivity)
+
+### Frontend (GitHub Pages)
+- **Branch:** `gh-pages`
+- **Build:** `npx vite build` from `frontend/`
+- **SPA routing:** `404.html` redirects to `index.html` with sessionStorage trick
+- **API URL:** Set via `VITE_API_URL` env var in `.env.production`
+
+### File Structure
+```
+backend/
+├── Dockerfile
+├── system.properties          (java.runtime.version=17)
+├── pom.xml
+├── mvnw / .mvn/               (Maven wrapper)
+└── src/main/java/com/jumpstart/api/
+    ├── JumpStartApplication.java
+    ├── config/
+    │   ├── SecurityConfig.java    (CORS + JWT + auth rules)
+    │   └── JWTFilter.java
+    ├── controller/
+    │   ├── AuthController.java
+    │   ├── StartupController.java
+    │   ├── TeamMemberController.java
+    │   ├── AnalysisController.java
+    │   ├── SkillHeatmapController.java
+    │   └── IntegrationUserController.java
+    ├── service/
+    │   ├── UserService.java
+    │   ├── StartupService.java
+    │   ├── TeamMemberService.java
+    │   ├── AnalysisService.java
+    │   ├── ClaudeApiService.java
+    │   ├── SkillHeatmapService.java
+    │   ├── JWTService.java
+    │   └── IntegrationSkillService.java
+    ├── repository/
+    │   ├── UserRepository.java
+    │   ├── StartupRepository.java
+    │   ├── SkillRepository.java
+    │   ├── AnalysisResultRepository.java
+    │   ├── RoleAssignmentRepository.java
+    │   └── RoleGapRepository.java
+    ├── entity/
+    │   ├── User.java
+    │   ├── Startup.java
+    │   ├── Skill.java
+    │   ├── AnalysisResult.java
+    │   ├── RoleAssignment.java
+    │   ├── RoleGap.java
+    │   └── UserPrinciple.java
+    ├── dto/
+    │   ├── UserDto.java
+    │   ├── RegisterRequest.java
+    │   ├── LoginRequest.java
+    │   ├── TeamSkillHeatmapResponse.java
+    │   ├── MemberSkillHeatmapResponse.java
+    │   └── SkillCategoryScore.java
+    ├── exception/
+    │   └── ResourceNotFoundException.java
+    └── util/
+        └── SecurityUtil.java
+```
