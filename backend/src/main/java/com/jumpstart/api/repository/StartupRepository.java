@@ -14,4 +14,6 @@ public interface StartupRepository extends JpaRepository<Startup, Long> {
 
     @Query("SELECT s FROM Startup s JOIN s.members m WHERE m.userId = :userId")
     Optional<Startup> findFirstByMembersUserId(@Param("userId") Long userId);
+
+    Optional<Startup> findByInviteCode(String inviteCode);
 }

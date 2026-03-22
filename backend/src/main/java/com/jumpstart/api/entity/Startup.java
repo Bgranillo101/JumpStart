@@ -46,6 +46,9 @@ public class Startup {
 
     private LocalDateTime createdAt;
 
+    @Column(unique = true)
+    private String inviteCode;
+
     @JsonIgnore
     @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnalysisResult> analysisResults = new ArrayList<>();

@@ -1,24 +1,31 @@
 package com.jumpstart.api.service;
 
 import com.jumpstart.api.entity.Startup;
+import com.jumpstart.api.entity.User;
 import com.jumpstart.api.exception.ResourceNotFoundException;
 import com.jumpstart.api.repository.StartupRepository;
+import com.jumpstart.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class StartupService {
 
     private final StartupRepository startupRepository;
+    private final UserRepository userRepository;
 
-    public Startup createStartup(Startup startup) {
+    public Startup createStartup(Startup startup, Long ownerId) {
         if (startup.getName() == null || startup.getName().isBlank()) {
             throw new IllegalArgumentException("Startup name is required");
         }
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", ownerId));
+        startup.setOwner(owner);
         return startupRepository.save(startup);
     }
 
@@ -53,5 +60,29 @@ public class StartupService {
     public void deleteStartup(Long id) {
         Startup startup = getStartup(id);
         startupRepository.delete(startup);
+    }
+
+    public String generateInviteLink(Long startupId, Long requestingUserId, String frontendUrl) {
+        Startup startup = getStartup(startupId);
+        if (!startup.getOwner().getUserId().equals(requestingUserId)) {
+            throw new IllegalStateException("Only the startup owner can generate an invite code");
+        }
+        if (startup.getInviteCode() == null) {
+            startup.setInviteCode(UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+            startupRepository.save(startup);
+        }
+        return frontendUrl + "/join?code=" + startup.getInviteCode();
+    }
+
+    public Startup joinByInviteCode(String code, Long userId) {
+        Startup startup = startupRepository.findByInviteCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid invite code"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+        if (!startup.getMembers().contains(user)) {
+            startup.getMembers().add(user);
+            startupRepository.save(startup);
+        }
+        return startup;
     }
 }
