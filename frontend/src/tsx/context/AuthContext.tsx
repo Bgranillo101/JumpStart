@@ -44,6 +44,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('currentUser');
     localStorage.removeItem('startupId');
     localStorage.removeItem('userId');
+    localStorage.removeItem('demo_mode');
+    localStorage.removeItem('demo_startup');
+    localStorage.removeItem('demo_members');
+    localStorage.removeItem('demo_heatmap');
+    localStorage.removeItem('demo_analysis');
+    localStorage.removeItem('demo_techstack');
     setCurrentUser(null);
     setStartupId(null);
   };

@@ -99,6 +99,36 @@ export default function DashboardLayout() {
       return;
     }
 
+    // Demo mode — load from localStorage instead of API
+    const isDemo = localStorage.getItem('demo_mode') === 'true';
+    if (isDemo) {
+      try {
+        const s = localStorage.getItem('demo_startup');
+        if (s) setStartup(JSON.parse(s));
+        const m = localStorage.getItem('demo_members');
+        if (m) setMembers(JSON.parse(m));
+        const h = localStorage.getItem('demo_heatmap');
+        if (h) {
+          const heatmap = JSON.parse(h) as import('../../types').TeamSkillHeatmap;
+          setAiHeatmap(heatmap.aiGenerated ?? false);
+          setHeatmapData(
+            heatmap.categories.map(c => ({
+              subject: c.category,
+              value: parseFloat(c.averageProficiency.toFixed(1)),
+              fullMark: 10,
+              insight: c.insight,
+            }))
+          );
+        }
+        const a = localStorage.getItem('demo_analysis');
+        if (a) setAnalysis(JSON.parse(a));
+        const t = localStorage.getItem('demo_techstack');
+        if (t) setTechStack(JSON.parse(t));
+      } catch { /* ignore parse errors */ }
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
