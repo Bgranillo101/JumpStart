@@ -26,6 +26,7 @@ public class StartupService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", ownerId));
         startup.setOwner(owner);
+        startup.getMembers().add(owner);
         return startupRepository.save(startup);
     }
 
