@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/startups/{startupId}")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SkillHeatmapController {
 
     private final SkillHeatmapService skillHeatmapService;

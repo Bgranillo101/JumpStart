@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/startups")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class StartupController {
 
     private final StartupService startupService;

@@ -12,7 +12,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/startups/{startupId}/members")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class TeamMemberController {
 
     private final TeamMemberService teamMemberService;
