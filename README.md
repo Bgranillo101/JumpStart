@@ -202,9 +202,9 @@ JumpStart/
 
 | Name | GitHub | Role |
 |------|--------|------|
-| Brandon Granillo | [@Bgranillo101](https://github.com/Bgranillo101) | Frontend & Integration |
-| Lincoln Vondra | [@vondraCS](https://github.com/vondraCS) | Backend & Infrastructure |
-| Sebastian Fragoso | | Frontend & Animations |
+| Brandon Granillo | [@Bgranillo101](https://github.com/Bgranillo101) | Backend |
+| Lincoln Vondra | [@vondraCS](https://github.com/vondraCS) | Frontend |
+| Sebastian Fragoso | | Frontend |
 | Gabriel Wright-Swaine | | Backend |
 
 ---
