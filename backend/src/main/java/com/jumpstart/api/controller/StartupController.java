@@ -14,17 +14,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/startups")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class StartupController {
 
     private final StartupService startupService;
 
-    @Value("${frontend.url}")
+    @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
     @PostMapping
     public ResponseEntity<Startup> createStartup(@RequestBody Startup startup) {
-        Long ownerId = SecurityUtil.getCurrentUserId();
-        Startup created = startupService.createStartup(startup, ownerId);
+        Startup created = startupService.createStartup(startup);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -50,16 +50,15 @@ public class StartupController {
     }
 
     @PostMapping("/{id}/invite")
-    public ResponseEntity<String> generateInviteLink(@PathVariable Long id) {
-        Long userId = SecurityUtil.getCurrentUserId();
-        String link = startupService.generateInviteLink(id, userId, frontendUrl);
+    public ResponseEntity<String> generateInvite(@PathVariable Long id) {
+        String code = startupService.generateInviteCode(id);
+        String link = frontendUrl + "/invite?code=" + code;
         return ResponseEntity.ok(link);
     }
 
     @PostMapping("/join/{code}")
-    public ResponseEntity<Startup> joinByInviteCode(@PathVariable String code) {
+    public ResponseEntity<Startup> joinByInvite(@PathVariable String code) {
         Long userId = SecurityUtil.getCurrentUserId();
-        Startup startup = startupService.joinByInviteCode(code, userId);
-        return ResponseEntity.ok(startup);
+        return ResponseEntity.ok(startupService.joinByInviteCode(code, userId));
     }
 }

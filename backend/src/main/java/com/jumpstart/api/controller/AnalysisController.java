@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/startups/{startupId}/analyze")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AnalysisController {
 
     private final AnalysisService analysisService;

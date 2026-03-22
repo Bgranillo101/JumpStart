@@ -9,12 +9,11 @@ import { Badge } from '../../components/badge';
 import { Button } from '../../components/buttons';
 import { Toast } from '../../components/Toast';
 import { ReadinessGauge } from '../../components/ReadinessGauge';
-import { OnboardingTour } from '../../components/OnboardingTour';
 import { useAuth } from '../../context/AuthContext';
 import { useSSE } from '../../hooks/useSSE';
 import {
   getTeam, getMembers, getTeamHeatmap, getAnalysisResults, runAnalysis,
-  generateInviteLink, getTechStackResults, runTechStackAnalysis,
+  getTechStackResults, generateInviteLink,
 } from '../../api';
 import type { Startup, User, AnalysisResult, SkillData, TechStackRecommendation } from '../../types';
 import '../../../css/dashboard.css';
@@ -154,17 +153,7 @@ export default function DashboardLayout() {
   };
 
   const handleRunTechStack = async () => {
-    if (!startupId) return;
-    setGeneratingTechStack(true);
-    setError('');
-    try {
-      const result = await runTechStackAnalysis(startupId);
-      setTechStack(result);
-    } catch {
-      setError('Tech stack generation failed. Run a team analysis first.');
-    } finally {
-      setGeneratingTechStack(false);
-    }
+    setError('Tech stack recommendations are not yet available.');
   };
 
   const handleDownloadReport = useCallback(async () => {
@@ -179,8 +168,9 @@ export default function DashboardLayout() {
         techStack,
         heatmapElement: heatmapRef.current,
       });
-    } catch {
-      setError('Failed to generate report.');
+    } catch (err) {
+      console.error('Report generation error:', err);
+      setError('Failed to generate report: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setGeneratingReport(false);
     }
@@ -273,7 +263,7 @@ export default function DashboardLayout() {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <h1 className="dashboard-greeting">
-            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''} \uD83D\uDC4B
+            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''} 👋
           </h1>
           <p className="dashboard-subtitle">
             {startup?.name ?? 'Loading your startup\u2026'}
@@ -353,7 +343,7 @@ export default function DashboardLayout() {
               <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
                 <p className="dash-section-title">Team Skill Heatmap</p>
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDCCA</span>
+                  <span className="empty-state-icon">📊</span>
                   <span className="empty-state-title">No skill data yet</span>
                   <span className="empty-state-desc">Team members need to add their skills before the heatmap can be generated.</span>
                 </div>
@@ -468,7 +458,7 @@ export default function DashboardLayout() {
               ))}
               {members.length === 0 && (
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDC65</span>
+                  <span className="empty-state-icon">👥</span>
                   <span className="empty-state-title">No team members yet</span>
                   <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
                 </div>
@@ -484,7 +474,7 @@ export default function DashboardLayout() {
             {!analysis ? (
               <div className="dash-section-card">
                 <div className="empty-state">
-                  <span className="empty-state-icon">\u26A1</span>
+                  <span className="empty-state-icon">⚡</span>
                   <span className="empty-state-title">No analysis results yet</span>
                   <span className="empty-state-desc">Run an AI analysis to get role assignments and identify skill gaps on your team.</span>
                   <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId} style={{ marginTop: '0.5rem' }}>
@@ -555,7 +545,7 @@ export default function DashboardLayout() {
             {techStack.length === 0 ? (
               <div className="dash-section-card">
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDD27</span>
+                  <span className="empty-state-icon">🔧</span>
                   <span className="empty-state-title">No tech stack recommendations yet</span>
                   <span className="empty-state-desc">Generate AI-powered technology recommendations based on your team's skills and startup goals.</span>
                   <Button variant="primary" size="md" onClick={handleRunTechStack} disabled={generatingTechStack || !startupId} style={{ marginTop: '0.5rem' }}>
@@ -607,7 +597,6 @@ export default function DashboardLayout() {
             </p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <Button variant="outline" size="md" onClick={handleLogout}>Sign Out</Button>
-              <Button variant="ghost" size="md" onClick={handleReplayTour}>Replay Tour</Button>
             </div>
           </div>
         )}
@@ -615,9 +604,6 @@ export default function DashboardLayout() {
 
       {/* Toast notification */}
       <Toast message={toastMessage} visible={toastVisible} onDismiss={() => setToastVisible(false)} />
-
-      {/* Onboarding tour (first-time users) */}
-      {!loading && <OnboardingTour />}
     </div>
   );
 }

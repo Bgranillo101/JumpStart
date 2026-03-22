@@ -119,13 +119,9 @@ export async function getUser(userId: number): Promise<User> {
   return res.json();
 }
 
-export async function getUserStartup(userId: number): Promise<Startup | null> {
-  const res = await fetch(`${BASE_URL}/users/${userId}/startup`, {
-    headers: authHeaders(),
-  });
-  if (res.status === 204) return null;
-  if (!res.ok) throw new Error('Failed to fetch user startup');
-  return res.json();
+export async function getUserStartup(_userId: number): Promise<Startup | null> {
+  // Endpoint not yet implemented on backend — resolve from localStorage via caller
+  return null;
 }
 
 export async function updateUserProfile(
@@ -203,7 +199,7 @@ export async function generateInviteLink(startupId: number): Promise<string> {
     method: 'POST',
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error('Failed to generate invite link');
+  if (!res.ok) throw new Error(await res.text() || 'Failed to generate invite link');
   return res.text();
 }
 
@@ -212,7 +208,7 @@ export async function joinByInviteCode(code: string): Promise<Startup> {
     method: 'POST',
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error('Invalid or expired invite code');
+  if (!res.ok) throw new Error(await res.text() || 'Invalid or expired invite code');
   return res.json();
 }
 

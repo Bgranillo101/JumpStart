@@ -7,8 +7,8 @@ import com.jumpstart.api.repository.StartupRepository;
 import com.jumpstart.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,23 +19,27 @@ public class StartupService {
     private final StartupRepository startupRepository;
     private final UserRepository userRepository;
 
-    public Startup createStartup(Startup startup, Long ownerId) {
+    public Startup createStartup(Startup startup) {
         if (startup.getName() == null || startup.getName().isBlank()) {
             throw new IllegalArgumentException("Startup name is required");
         }
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", ownerId));
-        startup.setOwner(owner);
+        // Resolve owner to a managed entity so JPA can store the FK correctly
+        if (startup.getOwner() != null && startup.getOwner().getUserId() != null) {
+            User owner = userRepository.findById(startup.getOwner().getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", startup.getOwner().getUserId()));
+            startup.setOwner(owner);
+        }
+        if (startup.getMembers() == null) {
+            startup.setMembers(new ArrayList<>());
+        }
         return startupRepository.save(startup);
     }
 
-    @Transactional(readOnly = true)
     public Startup getStartup(Long id) {
         return startupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Startup", id));
     }
 
-    @Transactional(readOnly = true)
     public List<Startup> getAllStartups() {
         return startupRepository.findAll();
     }
@@ -62,21 +66,17 @@ public class StartupService {
         startupRepository.delete(startup);
     }
 
-    public String generateInviteLink(Long startupId, Long requestingUserId, String frontendUrl) {
+    public String generateInviteCode(Long startupId) {
         Startup startup = getStartup(startupId);
-        if (!startup.getOwner().getUserId().equals(requestingUserId)) {
-            throw new IllegalStateException("Only the startup owner can generate an invite code");
-        }
-        if (startup.getInviteCode() == null) {
-            startup.setInviteCode(UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-            startupRepository.save(startup);
-        }
-        return frontendUrl + "/join?code=" + startup.getInviteCode();
+        String code = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+        startup.setInviteCode(code);
+        startupRepository.save(startup);
+        return code;
     }
 
     public Startup joinByInviteCode(String code, Long userId) {
         Startup startup = startupRepository.findByInviteCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid invite code"));
+                .orElseThrow(() -> new RuntimeException("Invalid or expired invite code"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         if (!startup.getMembers().contains(user)) {

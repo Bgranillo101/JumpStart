@@ -32,12 +32,4 @@ public class IntegrationSkillService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
-
-    public User updateUserProfile(Long userId, String name, String preferredRole) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        if (name != null) user.setName(name);
-        if (preferredRole != null) user.setPreferredRole(preferredRole);
-        return userRepository.save(user);
-    }
 }

@@ -1,13 +1,11 @@
 package com.jumpstart.api.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,17 +19,17 @@ public class Startup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name = "startup_members",
             joinColumns = @JoinColumn(name = "startup_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> members = new ArrayList<>();
+    private List<User> members;
 
     @Column(nullable = false)
     private String name;
@@ -44,14 +42,13 @@ public class Startup {
     @Column(columnDefinition = "TEXT")
     private String keyChallenges;
 
-    private LocalDateTime createdAt;
-
     @Column(unique = true)
     private String inviteCode;
 
-    @JsonIgnore
+    private LocalDateTime createdAt;
+
     @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AnalysisResult> analysisResults = new ArrayList<>();
+    private List<AnalysisResult> analysisResults;
 
     @PrePersist
     protected void onCreate() {
