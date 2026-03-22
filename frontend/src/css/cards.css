@@ -1,7 +1,8 @@
 .step-card {
   text-align: center;
   padding: 2.25rem 1.5rem;
-  background-color: aqua;
+  background: linear-gradient(155deg, #1e1f25 0%, rgba(0, 0, 0, 0.332) 100%);
+  --background-color: aqua;
   transition:
     transform var(--transition-normal),
     box-shadow var(--transition-normal);
