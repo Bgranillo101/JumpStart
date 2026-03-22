@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark, faFile, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '../../components/buttons';
 import { Input } from '../../components/Input';
 import { StepIndicator } from '../../components/stepindicator';
@@ -209,7 +211,7 @@ export default function CreateProfile() {
               {state.profileSkills.map(skill => (
                 <span key={skill} className="tag-chip">
                   {skill}
-                  <button type="button" className="tag-remove" onClick={() => removeSkill(skill)}>×</button>
+                  <button type="button" className="tag-remove" onClick={() => removeSkill(skill)}><FontAwesomeIcon icon={faXmark} /></button>
                 </span>
               ))}
               <input
@@ -235,10 +237,10 @@ export default function CreateProfile() {
               onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
             >
               {state.resumeFile ? (
-                <span className="file-upload-selected">📄 {state.resumeFile.name}</span>
+                <span className="file-upload-selected"><FontAwesomeIcon icon={faFile} /> {state.resumeFile.name}</span>
               ) : (
                 <>
-                  <span className="file-upload-icon">📎</span>
+                  <span className="file-upload-icon"><FontAwesomeIcon icon={faPaperclip} /></span>
                   <span className="file-upload-text">
                     <span>Click to upload</span> or drag and drop
                   </span>

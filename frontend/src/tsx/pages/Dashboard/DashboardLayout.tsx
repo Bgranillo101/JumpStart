@@ -1,5 +1,11 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faGauge, faUsers, faBolt, faLayerGroup, faGear,
+  faCode, faCubes, faDatabase, faWrench, faCloud, faBox,
+  faChartBar, faFile,
+} from '@fortawesome/free-solid-svg-icons';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
   ResponsiveContainer, Tooltip,
@@ -20,20 +26,20 @@ import {
 import type { Startup, User, AnalysisResult, SkillData, TechStackRecommendation } from '../../types';
 import '../../../css/dashboard.css';
 
-const NAV_LINKS = [
-  { icon: '\u2B21', label: 'Overview', id: 'overview' },
-  { icon: '👥', label: 'Team', id: 'team' },
-  { icon: '\u26A1', label: 'Analysis', id: 'analysis' },
-  { icon: '🔧', label: 'Tech Stack', id: 'techstack' },
-  { icon: '\u2699', label: 'Settings', id: 'settings' },
+const NAV_LINKS: { icon: React.ReactNode; label: string; id: string }[] = [
+  { icon: <FontAwesomeIcon icon={faGauge} />, label: 'Overview', id: 'overview' },
+  { icon: <FontAwesomeIcon icon={faUsers} />, label: 'Team', id: 'team' },
+  { icon: <FontAwesomeIcon icon={faBolt} />, label: 'Analysis', id: 'analysis' },
+  { icon: <FontAwesomeIcon icon={faLayerGroup} />, label: 'Tech Stack', id: 'techstack' },
+  { icon: <FontAwesomeIcon icon={faGear} />, label: 'Settings', id: 'settings' },
 ];
 
-const CATEGORY_ICONS: Record<string, string> = {
-  LANGUAGE: '\uD83D\uDCDD',
-  FRAMEWORK: '\uD83C\uDFD7\uFE0F',
-  DATABASE: '\uD83D\uDDC4\uFE0F',
-  TOOL: '\uD83D\uDD27',
-  INFRASTRUCTURE: '\u2601\uFE0F',
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  LANGUAGE: <FontAwesomeIcon icon={faCode} />,
+  FRAMEWORK: <FontAwesomeIcon icon={faCubes} />,
+  DATABASE: <FontAwesomeIcon icon={faDatabase} />,
+  TOOL: <FontAwesomeIcon icon={faWrench} />,
+  INFRASTRUCTURE: <FontAwesomeIcon icon={faCloud} />,
 };
 
 const PRIORITY_LABELS: Record<number, string> = {
@@ -364,7 +370,7 @@ export default function DashboardLayout() {
               <div className="dash-section-card card-stagger" style={{ marginBottom: 'var(--spacing-xl)' }}>
                 <p className="dash-section-title">Team Skill Heatmap</p>
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDCCA</span>
+                  <span className="empty-state-icon"><FontAwesomeIcon icon={faChartBar} /></span>
                   <span className="empty-state-title">No skill data yet</span>
                   <span className="empty-state-desc">Team members need to add their skills before the heatmap can be generated.</span>
                 </div>
@@ -426,7 +432,7 @@ export default function DashboardLayout() {
                 ))}
                 {members.length === 0 && (
                   <div className="empty-state">
-                    <span className="empty-state-icon"></span>
+                    <span className="empty-state-icon"><FontAwesomeIcon icon={faUsers} /></span>
                     <span className="empty-state-title">No team members yet</span>
                     <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
                   </div>
@@ -514,7 +520,7 @@ export default function DashboardLayout() {
             {!analysis ? (
               <div className="dash-section-card card-stagger">
                 <div className="empty-state">
-                  <span className="empty-state-icon">\u26A1</span>
+                  <span className="empty-state-icon"><FontAwesomeIcon icon={faBolt} /></span>
                   <span className="empty-state-title">No analysis results yet</span>
                   <span className="empty-state-desc">Run an AI analysis to get role assignments and identify skill gaps on your team.</span>
                   <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId} style={{ marginTop: '0.5rem' }}>
@@ -527,7 +533,7 @@ export default function DashboardLayout() {
                 {/* Download report button */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
                   <Button variant="outline" size="md" onClick={handleDownloadReport} disabled={generatingReport}>
-                    {generatingReport ? 'Generating\u2026' : '\uD83D\uDCC4 Download Report'}
+                    {generatingReport ? 'Generating…' : <><FontAwesomeIcon icon={faFile} /> Download Report</>}
                   </Button>
                 </div>
 
@@ -585,7 +591,7 @@ export default function DashboardLayout() {
             {techStack.length === 0 ? (
               <div className="dash-section-card card-stagger">
                 <div className="empty-state">
-                  <span className="empty-state-icon"></span>
+                  <span className="empty-state-icon"><FontAwesomeIcon icon={faLayerGroup} /></span>
                   <span className="empty-state-title">No tech stack recommendations yet</span>
                   <span className="empty-state-desc">Generate AI-powered technology recommendations based on your team's skills and startup goals.</span>
                   <Button variant="primary" size="md" onClick={handleRunTechStack} disabled={generatingTechStack || !startupId} style={{ marginTop: '0.5rem' }}>
@@ -606,7 +612,7 @@ export default function DashboardLayout() {
                 {Object.entries(techStackByCategory).map(([category, recs]) => (
                   <div key={category} style={{ marginBottom: 'var(--spacing-xl)' }}>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
-                      {CATEGORY_ICONS[category] || '\uD83D\uDCE6'} {category}
+                      {CATEGORY_ICONS[category] ?? <FontAwesomeIcon icon={faBox} />} {category}
                     </p>
                     <div className="tech-card-grid">
                       {recs.map(rec => (

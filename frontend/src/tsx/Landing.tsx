@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import '../css/landing.css';
 import '../css/cards.css'
 import { Button } from './components/buttons';
@@ -77,7 +79,7 @@ export default function LandingPage() {
         </div>
         <div className="hero-arrow">
           <button className="hero-arrow-btn" onClick={scrollToAbout} aria-label="Scroll down">
-            ↓
+            <FontAwesomeIcon icon={faChevronDown} />
           </button>
         </div>
       </section>

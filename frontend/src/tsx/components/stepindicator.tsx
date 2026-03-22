@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import '../../css/components.css';
 
 interface Step {
@@ -25,7 +27,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep
             )}
             <div className="step-item-wrapper">
               <div className={`step-dot ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
-                {isCompleted ? '✓' : stepNum}
+                {isCompleted ? <FontAwesomeIcon icon={faCheck} /> : stepNum}
               </div>
               <span className={`step-label ${isActive ? 'active' : ''}`}>{step.label}</span>
             </div>

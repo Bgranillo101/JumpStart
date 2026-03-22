@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import '../../css/components.css';
 
 interface ModalProps {
@@ -24,7 +26,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         {title && (
           <div className="modal-header">
             <span className="modal-title">{title}</span>
-            <button className="modal-close" onClick={onClose}>×</button>
+            <button className="modal-close" onClick={onClose}><FontAwesomeIcon icon={faXmark} /></button>
           </div>
         )}
         {children}

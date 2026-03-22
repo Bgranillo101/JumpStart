@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import '../../css/toast.css';
 
 interface ToastProps {
@@ -17,7 +19,7 @@ export function Toast({ message, visible, onDismiss }: ToastProps) {
   return (
     <div className={`toast ${visible ? 'visible' : ''}`} role="alert" aria-live="assertive">
       <span className="toast-message">{message}</span>
-      <button className="toast-close" onClick={onDismiss} aria-label="Dismiss">✕</button>
+      <button className="toast-close" onClick={onDismiss} aria-label="Dismiss"><FontAwesomeIcon icon={faXmark} /></button>
     </div>
   );
 }

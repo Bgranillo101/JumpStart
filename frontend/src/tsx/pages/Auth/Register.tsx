@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRocket, faHandshake } from '@fortawesome/free-solid-svg-icons';
 import { StepIndicator } from '../../components/stepindicator';
 import { useWizard } from '../../context/WizardContext';
 import '../../../css/auth.css';
@@ -30,7 +32,7 @@ export default function Register() {
           tabIndex={0}
           onKeyDown={e => e.key === 'Enter' && handleChoice('create')}
         >
-          <div className="choice-icon">🚀</div>
+          <div className="choice-icon"><FontAwesomeIcon icon={faRocket} /></div>
           <h2 className="choice-title">Create a Company</h2>
           <p className="choice-desc">
             Start your own startup, build your team from scratch, and get a recommended tech stack.
@@ -44,7 +46,7 @@ export default function Register() {
           tabIndex={0}
           onKeyDown={e => e.key === 'Enter' && handleChoice('join')}
         >
-          <div className="choice-icon">🤝</div>
+          <div className="choice-icon"><FontAwesomeIcon icon={faHandshake} /></div>
           <h2 className="choice-title">Join a Team</h2>
           <p className="choice-desc">
             Search for an existing startup and request to join their team with your skills.
