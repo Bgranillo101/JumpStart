@@ -224,7 +224,7 @@ JumpStart/
 | Brandon Granillo | [@Bgranillo101](https://github.com/Bgranillo101) | Backend |
 | Lincoln Vondra | [@vondraCS](https://github.com/vondraCS) | Frontend |
 | Sebastian Fragoso | | Frontend |
-| Gabriel Wright-Swaine | | Backend |
+| Gabriel Wright-Swaine | @gawrigh7(https://github.com/gawrigh7) | Backend |
 
 ---
 
