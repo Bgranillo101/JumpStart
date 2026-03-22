@@ -119,6 +119,15 @@ export async function getUser(userId: number): Promise<User> {
   return res.json();
 }
 
+export async function getUserStartup(userId: number): Promise<Startup | null> {
+  const res = await fetch(`${BASE_URL}/users/${userId}/startup`, {
+    headers: authHeaders(),
+  });
+  if (res.status === 204) return null;
+  if (!res.ok) throw new Error('Failed to fetch user startup');
+  return res.json();
+}
+
 export async function updateUserProfile(
   userId: number,
   data: { name?: string; preferredRole?: string }

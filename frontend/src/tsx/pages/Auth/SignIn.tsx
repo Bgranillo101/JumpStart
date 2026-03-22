@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/buttons';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../context/AuthContext';
-import { login, decodeJwt, getUser } from '../../api';
+import { login, decodeJwt, getUser, getUserStartup } from '../../api';
 import type { User } from '../../types';
 import '../../../css/auth.css';
 
@@ -28,22 +28,31 @@ export default function SignIn() {
     }
 
     const { userId, sub } = decodeJwt(result.token);
-    const startupId = localStorage.getItem('startupId');
 
-    // Fetch full user object from backend so auth context has complete data
+    // Fetch full user object from backend
     let fullUser: User = { userId, username: sub, email: '', skills: [] };
     try {
-      const fetched = await getUser(userId);
-      fullUser = fetched;
+      fullUser = await getUser(userId);
     } catch {
       // Fall back to minimal user if fetch fails
     }
 
-    authLogin(
-      fullUser,
-      result.token,
-      startupId ? parseInt(startupId) : undefined
-    );
+    // Discover user's startup from backend
+    let sid: number | undefined = undefined;
+    try {
+      const startup = await getUserStartup(userId);
+      if (startup) sid = startup.id;
+    } catch {
+      // No startup found
+    }
+
+    // Fall back to localStorage if backend didn't return a startup
+    if (!sid) {
+      const stored = localStorage.getItem('startupId');
+      if (stored) sid = parseInt(stored);
+    }
+
+    authLogin(fullUser, result.token, sid);
 
     navigate('/dashboard');
   };
