@@ -22,6 +22,7 @@ public class RoleAssignment {
     @JoinColumn(name = "analysis_id", nullable = false)
     private AnalysisResult analysisResult;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
