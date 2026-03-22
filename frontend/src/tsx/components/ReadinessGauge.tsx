@@ -53,7 +53,7 @@ export function ReadinessGauge({ score }: ReadinessGaugeProps) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.08)"
+          stroke="var(--chart-bg-circle)"
           strokeWidth={stroke}
         />
         {/* Animated foreground arc */}

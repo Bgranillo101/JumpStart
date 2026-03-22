@@ -31,13 +31,13 @@
     var(--accent-primary),
     var(--accent-secondary)
   );
-  color: #1a1a14;
+  color: var(--text-on-accent);
   box-shadow: var(--shadow-glow);
 }
 .btn-primary:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 0 32px rgba(255, 221, 0, 0.3);
+  box-shadow: 0 0 32px var(--accent-glow);
 }
 
 .btn-secondary {
@@ -46,7 +46,7 @@
   border: 1px solid var(--bg-glass-border);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-strong);
 }
 
 .btn-outline {
@@ -55,7 +55,7 @@
   border: 1.5px solid var(--accent-primary);
 }
 .btn-outline:hover:not(:disabled) {
-  background: rgba(255, 221, 0, 0.08);
+  background: var(--accent-subtle);
   transform: translateY(-1px);
 }
 
@@ -101,7 +101,7 @@
 .input-field {
   width: 100%;
   padding: 0.7rem 1rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-card);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -113,7 +113,7 @@
 .input-field:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(255, 221, 0, 0.15);
+  box-shadow: 0 0 0 2px var(--accent-focus);
 }
 
 .input-field::placeholder {
@@ -134,7 +134,7 @@
   flex-wrap: wrap;
   gap: 0.4rem;
   padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-card);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
   cursor: text;
@@ -145,7 +145,7 @@
 
 .tag-input-wrapper:focus-within {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(255, 221, 0, 0.15);
+  box-shadow: 0 0 0 2px var(--accent-focus);
 }
 
 .tag-chip {
@@ -153,8 +153,8 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.15rem 0.6rem;
-  background: rgba(255, 221, 0, 0.12);
-  border: 1px solid rgba(255, 221, 0, 0.25);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-medium);
   border-radius: var(--radius-full);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -206,7 +206,7 @@
 .file-upload-zone:hover,
 .file-upload-zone.drag-over {
   border-color: var(--accent-primary);
-  background: rgba(255, 221, 0, 0.04);
+  background: var(--accent-ghost);
 }
 
 .file-upload-icon {
@@ -243,15 +243,15 @@
 }
 
 .badge-brand {
-  background: rgba(255, 221, 0, 0.12);
+  background: var(--accent-soft);
   color: var(--accent-primary);
-  border: 1px solid rgba(255, 221, 0, 0.25);
+  border: 1px solid var(--accent-medium);
 }
 
 .badge-tertiary {
-  background: rgba(49, 62, 104, 0.35);
-  color: #a0aecf;
-  border: 1px solid rgba(49, 62, 104, 0.55);
+  background: var(--tertiary-bg);
+  color: var(--tertiary-text);
+  border: 1px solid var(--tertiary-border);
 }
 
 .badge-neutral {
@@ -274,7 +274,7 @@
     var(--accent-primary),
     var(--accent-secondary)
   );
-  color: #1a1a14;
+  color: var(--text-on-accent);
   text-transform: uppercase;
 }
 
@@ -345,7 +345,7 @@
 
 .step-dot.active {
   border-color: var(--accent-primary);
-  background: rgba(255, 221, 0, 0.12);
+  background: var(--accent-soft);
   color: var(--accent-primary);
 }
 
@@ -356,7 +356,7 @@
     var(--accent-secondary)
   );
   border-color: transparent;
-  color: #1a1a14;
+  color: var(--text-on-accent);
 }
 
 .step-label {
@@ -374,7 +374,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--modal-scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 999;
@@ -446,9 +446,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%
+    var(--skeleton-from) 25%,
+    var(--skeleton-to) 50%,
+    var(--skeleton-from) 75%
   );
   background-size: 200% 100%;
   animation: skeletonShimmer 1.5s ease-in-out infinite;
@@ -488,7 +488,7 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-hover);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-lg);
 }

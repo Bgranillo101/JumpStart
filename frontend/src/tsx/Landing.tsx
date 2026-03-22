@@ -5,6 +5,7 @@ import '../css/cards.css'
 import { Button } from './components/buttons';
 import { Card } from './components/cards';
 import OrgChartBackground from './components/OrgChartBackground';
+import { Toast } from './components/Toast';
 import { tryDemo, decodeJwt, getUser, getUserStartup } from './api';
 import { useAuth } from './context/AuthContext';
 
@@ -12,6 +13,13 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
   const [demoLoading, setDemoLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setToastVisible(true);
+  };
 
   const scrollToAbout = () => {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
@@ -21,14 +29,17 @@ export default function LandingPage() {
     setDemoLoading(true);
     try {
       const result = await tryDemo();
-      if (!result.success || !result.token) return;
+      if (!result.success || !result.token) {
+        showToast(result.error || 'Demo login failed. Make sure the backend is running.');
+        return;
+      }
       const { userId } = decodeJwt(result.token);
       const fullUser = await getUser(userId);
       const startup = await getUserStartup(userId);
       authLogin(fullUser, result.token, startup?.id);
       navigate('/dashboard');
     } catch {
-      // silently fail
+      showToast('Could not connect to the server. Make sure the backend is running.');
     } finally {
       setDemoLoading(false);
     }
@@ -173,6 +184,7 @@ export default function LandingPage() {
           <span className="footer-copy">© {new Date().getFullYear()} JumpStart. All rights reserved.</span>
         </div>
       </footer>
+      <Toast message={toastMessage} visible={toastVisible} onDismiss={() => setToastVisible(false)} />
     </div>
   );
 }

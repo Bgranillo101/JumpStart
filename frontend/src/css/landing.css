@@ -19,9 +19,9 @@
     );
   background: linear-gradient(
     125deg,
-    rgb(42, 42, 34) 0%,
-    rgb(22, 22, 22) 30%,
-    #191a22 85%
+    var(--hero-bg-1) 0%,
+    var(--hero-bg-2) 30%,
+    var(--hero-bg-3) 85%
   );
 }
 
@@ -37,8 +37,8 @@
   --padding-bottom: 0rem;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(ellipse at top, rgba(255, 221, 0, 0.06) 0%, transparent 55%),
-              radial-gradient(ellipse at bottom right, rgba(49, 62, 104, 0.15) 0%, transparent 50%);
+  background: radial-gradient(ellipse at top, var(--accent-ghost) 0%, transparent 55%),
+              radial-gradient(ellipse at bottom right, var(--tertiary-bg) 0%, transparent 50%);
 }
 
 .hero-content {
@@ -209,8 +209,8 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  background: rgba(255, 221, 0, 0.08);
-  border: 1px solid rgba(255, 221, 0, 0.22);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-medium);
   font-size: 1rem;
   font-weight: 800;
   color: var(--accent-primary);
@@ -287,7 +287,7 @@
 }
 
 .about-row:hover {
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--surface-hover);
 }
 
 @media (max-width: 720px) {
@@ -347,7 +347,7 @@
 /* ── Footer ── */
 .footer {
   --background: var(--bg-secondary);
-  background: rgb(25, 24, 29);
+  background: var(--footer-bg);
   border-top: 1px solid var(--bg-glass-border);
   padding: var(--spacing-xl) 5%;
 }

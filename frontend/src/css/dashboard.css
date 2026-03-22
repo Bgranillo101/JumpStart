@@ -57,7 +57,7 @@
 
 .sidebar-link:hover { background: var(--bg-glass); color: var(--text-primary); }
 .sidebar-link.active {
-  background: rgba(255, 221, 0, 0.1);
+  background: var(--accent-subtle);
   color: var(--accent-primary);
 }
 
@@ -174,13 +174,13 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-hover);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-lg);
   transition: border-color var(--transition-fast);
 }
 
-.member-row:hover { border-color: rgba(255, 221, 0, 0.15); }
+.member-row:hover { border-color: var(--accent-focus); }
 
 .member-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
 .member-name { font-weight: 600; font-size: 0.9375rem; }
@@ -252,7 +252,7 @@
     position: fixed;
     inset: 0;
     z-index: 199;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--scrim);
   }
 
   .sidebar-overlay.open {
@@ -292,16 +292,16 @@
 }
 
 .tech-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-overlay);
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
   transition: border-color 0.15s, background 0.15s;
 }
 
 .tech-card:hover {
-  border-color: rgba(255, 221, 0, 0.2);
-  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--accent-medium);
+  background: var(--surface-overlay);
 }
 
 .tech-card-header {

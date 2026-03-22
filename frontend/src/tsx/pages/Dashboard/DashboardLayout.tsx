@@ -380,21 +380,21 @@ export default function DashboardLayout() {
                       fontWeight: 600,
                       padding: '0.15rem 0.5rem',
                       borderRadius: '9999px',
-                      background: 'rgba(255, 221, 0, 0.15)',
-                      color: '#ffdd00',
-                      border: '1px solid rgba(255, 221, 0, 0.3)',
+                      background: 'var(--accent-focus)',
+                      color: 'var(--accent-primary)',
+                      border: '1px solid var(--accent-glow)',
                     }}>AI-Enhanced</span>
                   )}
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={heatmapData}>
-                    <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                    <PolarGrid stroke="var(--chart-grid)" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
-                    <Radar name="Team" dataKey="value" stroke="#ffdd00" fill="#ffdd00" fillOpacity={0.25} />
+                    <Radar name="Team" dataKey="value" stroke="var(--accent-primary)" fill="var(--accent-primary)" fillOpacity={0.25} />
                     <Tooltip
                       contentStyle={{ background: 'var(--bg-glass)', border: '1px solid var(--bg-glass-border)', borderRadius: '8px' }}
-                      formatter={(v: number, _name: string, props: { payload?: SkillData }) => {
-                        const insight = props.payload?.insight;
+                      formatter={(v, _name, props) => {
+                        const insight = (props as { payload?: SkillData }).payload?.insight;
                         return [
                           insight ? `${v} / 10 — ${insight}` : `${v} / 10`,
                           aiHeatmap ? 'AI Score' : 'Avg Proficiency',

@@ -97,14 +97,14 @@
 
 .register-choice-card:hover {
   border-color: var(--accent-primary);
-  background: rgba(255, 221, 0, 0.05);
+  background: var(--accent-ghost);
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(255, 221, 0, 0.1);
+  box-shadow: 0 8px 30px var(--accent-glow);
 }
 
 .register-choice-card.selected {
   border-color: var(--accent-primary);
-  background: rgba(255, 221, 0, 0.08);
+  background: var(--accent-subtle);
 }
 
 .choice-icon {
@@ -171,13 +171,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-hover);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-lg);
   transition: border-color var(--transition-fast);
 }
 
-.join-result-card:hover { border-color: rgba(255, 221, 0, 0.2); }
+.join-result-card:hover { border-color: var(--accent-medium); }
 
 .join-result-info { display: flex; flex-direction: column; gap: 0.2rem; }
 .join-result-name { font-weight: 600; font-size: 1rem; }

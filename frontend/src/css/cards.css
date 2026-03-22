@@ -23,8 +23,8 @@
 
 .step-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(255, 221, 0, 0.08);
-  border-color: rgba(255, 221, 0, 0.2);
+  box-shadow: 0 12px 40px var(--accent-ghost);
+  border-color: var(--accent-medium);
 }
 
 .step-card:hover::before {

@@ -52,10 +52,10 @@ const edges: { from: NodeId; to: NodeId }[] = [
 const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n])) as Record<NodeId, (typeof nodes)[number]>;
 
 const levelColors = [
-  { stroke: 'rgba(255,221,0,0.55)',   fill: 'rgba(255,221,0,0.07)',   text: 'rgba(255,221,0,0.75)'   },
-  { stroke: 'rgba(255,255,255,0.28)', fill: 'rgba(255,255,255,0.06)', text: 'rgba(255,255,255,0.55)' },
-  { stroke: 'rgba(255,255,255,0.18)', fill: 'rgba(255,255,255,0.04)', text: 'rgba(255,255,255,0.38)' },
-  { stroke: 'rgba(255,255,255,0.12)', fill: 'rgba(255,255,255,0.02)', text: 'rgba(255,255,255,0.28)' },
+  { stroke: 'var(--accent-glow)',     fill: 'var(--accent-ghost)',     text: 'var(--accent-primary)'   },
+  { stroke: 'var(--surface-strong)',   fill: 'var(--surface-raised)',   text: 'var(--text-secondary)'   },
+  { stroke: 'var(--surface-overlay)',  fill: 'var(--surface-hover)',    text: 'var(--text-muted)'       },
+  { stroke: 'var(--surface-raised)',   fill: 'var(--bg-card)',          text: 'var(--text-muted)'       },
 ];
 
 interface PhysicsNode extends SimulationNodeDatum {
@@ -189,7 +189,7 @@ export default function OrgChartBackground() {
               ref={el => { lineRefs.current[`${from}-${to}`] = el; }}
               x1={a.x} y1={a.y}
               x2={b.x} y2={b.y}
-              stroke="rgba(255,255,255,0.1)"
+              stroke="var(--chart-grid)"
               strokeWidth="1"
               strokeDasharray="1000"
               className="org-line"
