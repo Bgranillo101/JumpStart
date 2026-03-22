@@ -36,13 +36,14 @@ export default function LandingPage() {
     } catch {
       // Backend not running — seed offline demo data
       const fakeToken = `eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.${btoa(JSON.stringify({ sub: 'demo', userId: 1 }))}.demo`;
+      authLogin(DEMO_USER, fakeToken, DEMO_STARTUP.id);
+      // Set demo data AFTER authLogin (which clears old demo keys)
       localStorage.setItem('demo_mode', 'true');
       localStorage.setItem('demo_startup', JSON.stringify(DEMO_STARTUP));
       localStorage.setItem('demo_members', JSON.stringify(DEMO_MEMBERS));
       localStorage.setItem('demo_heatmap', JSON.stringify(DEMO_HEATMAP));
       localStorage.setItem('demo_analysis', JSON.stringify(DEMO_ANALYSIS));
       localStorage.setItem('demo_techstack', JSON.stringify(DEMO_TECH_STACK));
-      authLogin(DEMO_USER, fakeToken, DEMO_STARTUP.id);
       navigate('/dashboard');
     } finally {
       setDemoLoading(false);
