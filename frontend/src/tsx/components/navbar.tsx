@@ -10,7 +10,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
-  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/profile');
+  const isLoggedIn = !!currentUser;
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const avatarSrc = currentUser?.userId != null
@@ -36,8 +36,10 @@ export const Navbar: React.FC = () => {
           </span>
         </Link>
 
-        {isDashboard ? (
+        {isLoggedIn ? (
           <div className="navbar-links">
+            <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+            <ThemeToggle size="sm" />
             <div className="navbar-avatar-area">
               <button
                 className="navbar-avatar-btn"
