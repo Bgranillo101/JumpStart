@@ -19,6 +19,7 @@ public class StartupService {
     private final StartupRepository startupRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public Startup createStartup(Startup startup, Long ownerId) {
         if (startup.getName() == null || startup.getName().isBlank()) {
             throw new IllegalArgumentException("Startup name is required");
