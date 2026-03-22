@@ -40,7 +40,10 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <section className="getting-started-section">
-        <h2 className="section-title">How It Works</h2>
+        <div className="steps-header">
+          <h2 className="section-title">How It Works</h2>
+          <div className="about-accent-line" />
+        </div>
         <div className="steps-container">
           <Card className="step-card">
             <h3 className="step-number">1</h3>
@@ -62,19 +65,72 @@ export default function LandingPage() {
 
       {/* About */}
       <section id="about" className="about-section">
-        <div className="about-inner">
-          <div className="about-text-col">
-            <h2 className="section-title">About JumpStart</h2>
-            <p className="about-desc">
-              JumpStart helps tech startup founders seamlessly go from idea to a functioning team.
-              We evaluate your team's proficiencies, bridge skill gaps, and recommend technical
-              architectures — so you can focus on building what matters.
-            </p>
+        <div className="about-container">
+
+          <div className="about-intro">
+            <span className="about-eyebrow">About JumpStart</span>
+            <h2 className="about-headline">
+              Turn raw talent into<br />
+              <span className="about-headline-accent">structured excellence.</span>
+            </h2>
+          </div>
+
+          <div className="about-rows">
+            <div className="about-row">
+              <div className="about-row-meta">
+                <span className="about-row-num">01</span>
+                <span className="about-row-tag">The Platform</span>
+              </div>
+              <div className="about-row-content">
+                <h3 className="about-row-heading">The JumpStart Platform</h3>
+                <p className="about-row-copy">
+                  JumpStart is an intelligent platform designed exclusively for tech startup founders.
+                  We seamlessly transition your vision into reality by evaluating your team's
+                  proficiencies, bridging critical skill gaps, and mapping out scalable technical
+                  architectures based on AI-driven insights.
+                </p>
+              </div>
+            </div>
+
+            <div className="about-row">
+              <div className="about-row-meta">
+                <span className="about-row-num">02</span>
+                <span className="about-row-tag">Our Mission</span>
+              </div>
+              <div className="about-row-content">
+                <h3 className="about-row-heading">Our Mission</h3>
+                <p className="about-row-copy">
+                  Early-stage team building and technical planning are fraught with friction and
+                  costly misalignments. We exist to eliminate the guesswork. By translating raw
+                  talent into structured, highly-functioning teams, we empower founders to focus
+                  entirely on product development and market growth rather than administrative overhead.
+                </p>
+              </div>
+            </div>
+
+            <div className="about-row">
+              <div className="about-row-meta">
+                <span className="about-row-num">03</span>
+                <span className="about-row-tag">The Advantage</span>
+              </div>
+              <div className="about-row-content">
+                <h3 className="about-row-heading">The JumpStart Advantage</h3>
+                <p className="about-row-copy">
+                  We replace intuition with data. Our platform provides clear, visual skill heatmaps,
+                  objective role assignments, and customized tech stack recommendations tailored
+                  precisely to the actual capabilities of your team. You get a blueprint for success
+                  before a single line of code is written.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="about-footer-row">
             <Button variant="primary" size="md" onClick={() => navigate('/auth/register')}>
               Join the Platform
             </Button>
           </div>
-          <div className="about-graphic">🚀</div>
+
         </div>
       </section>
 
