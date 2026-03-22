@@ -23,6 +23,9 @@
   font-weight: 800;
   text-decoration: none;
   letter-spacing: -0.02em;
+  height: 100%;
+  display: flex;
+  align-items: end;
 }
 
 .navbar-links {
@@ -87,5 +90,10 @@
   transition: all var(--transition-fast);
 }
 
-.dropdown-item:hover { background: var(--bg-glass); color: var(--text-primary); }
-.dropdown-item-danger:hover { color: var(--accent-error); }
+.dropdown-item:hover {
+  background: var(--bg-glass);
+  color: var(--text-primary);
+}
+.dropdown-item-danger:hover {
+  color: var(--accent-error);
+}

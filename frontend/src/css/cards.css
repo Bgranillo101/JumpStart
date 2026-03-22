@@ -1,0 +1,20 @@
+.step-card {
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  background-color: aqua;
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(255, 221, 0, 0.08);
+}
+
+.card {
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  --background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+}

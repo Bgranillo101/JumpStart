@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import '../css/landing.css';
+import '../css/cards.css'
 import { Button } from './components/buttons';
 import { Card } from './components/cards';
 
@@ -39,17 +40,17 @@ export default function LandingPage() {
       <section className="getting-started-section">
         <h2 className="section-title">How It Works</h2>
         <div className="steps-container">
-          <Card glass className="step-card">
+          <Card className="step-card">
             <h3 className="step-number">1</h3>
             <h4 className="step-title">Create Your Idea</h4>
             <p className="step-desc">Define your startup vision — the problem, the solution, and your goals.</p>
           </Card>
-          <Card glass className="step-card">
+          <Card className="step-card">
             <h3 className="step-number">2</h3>
             <h4 className="step-title">Build Your Team</h4>
             <p className="step-desc">Add members with their skills and roles. Discover gaps in real time.</p>
           </Card>
-          <Card glass className="step-card">
+          <Card className="step-card">
             <h3 className="step-number">3</h3>
             <h4 className="step-title">Get Your Stack</h4>
             <p className="step-desc">Receive a recommended tech stack tailored to your team's strengths.</p>
