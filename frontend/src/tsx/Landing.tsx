@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { byPrefixAndName } from '@fortawesome/fontawesome-svg-core';
 import '../css/landing.css';
 import '../css/cards.css'
 import { Button } from './components/buttons';
