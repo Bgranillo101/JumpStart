@@ -5,6 +5,7 @@ import com.jumpstart.api.exception.ResourceNotFoundException;
 import com.jumpstart.api.repository.StartupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,11 +22,13 @@ public class StartupService {
         return startupRepository.save(startup);
     }
 
+    @Transactional(readOnly = true)
     public Startup getStartup(Long id) {
         return startupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Startup", id));
     }
 
+    @Transactional(readOnly = true)
     public List<Startup> getAllStartups() {
         return startupRepository.findAll();
     }

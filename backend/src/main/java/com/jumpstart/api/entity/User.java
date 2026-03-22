@@ -50,7 +50,7 @@ public class User {
     @ManyToMany(mappedBy = "members")
     private List<Startup> memberStartups;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Skill> skills;
 
     @JsonIgnore
