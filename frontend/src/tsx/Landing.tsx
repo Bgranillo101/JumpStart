@@ -67,9 +67,7 @@ export default function LandingPage() {
             <Button variant="secondary" size="lg" onClick={handleTryDemo} disabled={demoLoading}>
               {demoLoading ? 'Loading...' : 'Try Demo'}
             </Button>
-            <Button variant="outline" size="lg" onClick={scrollToAbout}>
-              Learn More
-            </Button>
+            
           </div>
         </div>
         <div className="hero-arrow">
