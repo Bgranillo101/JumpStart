@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './buttons';
 import { Avatar } from './avatar';
 import '../../css/navbar.css';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isDashboard = location.pathname.startsWith('/dashboard');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -53,7 +54,7 @@ export const Navbar: React.FC = () => {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => window.location.href = '/auth/register'}
+              onClick={() => navigate('/auth/register')}
             >
               Get Started
             </Button>
