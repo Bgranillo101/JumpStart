@@ -29,8 +29,8 @@ JumpStart helps tech startup founders build high-performing teams. Register your
 | Database | PostgreSQL 17 |
 | AI | Claude API (Anthropic) |
 | Auth | JWT (jjwt 0.12.5), Spring Security |
-| Testing | Playwright (E2E) |
-| Deployment | GitHub Pages (frontend), Docker + Railway (backend) |
+| Testing | JUnit 5 + Mockito (backend), Playwright (E2E frontend) |
+| Deployment | GitHub Pages (frontend), Render (backend) |
 
 ---
 
@@ -46,7 +46,7 @@ JumpStart helps tech startup founders build high-performing teams. Register your
                     ┌──────▼───────┐
                     │   Backend    │
                     │ Spring Boot  │
-                    │   Railway    │
+                    │    Render    │
                     └──┬───────┬───┘
                        │       │
               ┌────────▼──┐ ┌──▼──────────┐
@@ -115,6 +115,13 @@ The API starts at `http://localhost:8080/api`.
 
 ### Running Tests
 
+**Backend unit tests (JUnit 5 + Mockito — no database required):**
+```bash
+cd backend
+mvn test -Dspring.profiles.active=test
+```
+
+**Frontend E2E tests (Playwright):**
 ```bash
 cd frontend
 npm test              # Run all Playwright E2E tests (headless)
@@ -169,6 +176,10 @@ npm run test:ui       # Interactive Playwright UI
 
 ```
 JumpStart/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                  # Frontend lint/build/deploy to GitHub Pages
+│       └── backend.yml             # Backend tests + Render deploy hook
 ├── frontend/
 │   ├── src/
 │   │   ├── css/                    # Stylesheets
@@ -178,21 +189,29 @@ JumpStart/
 │   │       ├── context/            # React context (Auth, Wizard)
 │   │       ├── pages/
 │   │       │   ├── Auth/           # SignIn, Register, CreateProfile, JoinTeam, JoinByInvite
-│   │       │   └── Dashboard/      # DashboardLayout (Overview, Team, Analysis, Settings)
+│   │       │   ├── Dashboard/      # DashboardLayout (Overview, Team, Analysis, Settings)
+│   │       │   └── Profile/        # ProfilePage, ProfileHeader, SkillsSection
 │   │       ├── types/              # TypeScript interfaces
 │   │       ├── App.tsx             # Router and route definitions
 │   │       └── Landing.tsx         # Landing page
 │   ├── tests/                      # Playwright E2E tests
 │   └── playwright.config.ts
 ├── backend/
-│   └── src/main/java/com/jumpstart/api/
-│       ├── controller/             # REST controllers
-│       ├── service/                # Business logic + Claude API integration
-│       ├── repository/             # JPA repositories
-│       ├── entity/                 # Database entities
-│       ├── dto/                    # Data transfer objects
-│       ├── config/                 # Security, JWT, CORS
-│       └── exception/              # Custom exceptions
+│   └── src/
+│       ├── main/java/com/jumpstart/api/
+│       │   ├── controller/         # REST controllers
+│       │   ├── service/            # Business logic + Claude API integration
+│       │   ├── repository/         # JPA repositories
+│       │   ├── entity/             # Database entities
+│       │   ├── dto/                # Data transfer objects
+│       │   ├── config/             # Security, JWT, CORS
+│       │   └── exception/          # Custom exceptions
+│       └── test/java/com/jumpstart/api/
+│           ├── service/            # Unit tests: AnalysisService, StartupService
+│           └── controller/         # Slice tests: AuthController
+├── docs/
+│   ├── DEMO_SCRIPT.md              # Step-by-step demo walkthrough
+│   └── PRESENTATION.md             # Sprint 4 presentation talking points
 └── ROADMAP.md                      # Development roadmap
 ```
 
