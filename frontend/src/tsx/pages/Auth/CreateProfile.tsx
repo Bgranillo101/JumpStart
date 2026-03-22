@@ -109,22 +109,30 @@ export default function CreateProfile() {
 
       localStorage.setItem('startupId', String(startup.id));
 
-      // 4. Save skills if any
+      // 4. Save skills if any (non-fatal — user can add skills later)
       if (state.profileSkills.length > 0) {
         const skills: Skill[] = state.profileSkills.map(name => ({
           name,
           category: SKILL_CATEGORIES[0], // default to TECHNICAL; user can refine later
           proficiencyLevel: 5,
         }));
-        await addSkills(userId, skills);
+        try {
+          await addSkills(userId, skills);
+        } catch {
+          // Non-fatal: skills can be added from the dashboard
+        }
       }
 
-      // 5. Persist profile name and role to backend if provided
+      // 5. Persist profile name and role to backend if provided (non-fatal)
       if (state.profileName || state.profileRole) {
-        await updateUserProfile(userId, {
-          ...(state.profileName ? { name: state.profileName } : {}),
-          ...(state.profileRole ? { preferredRole: state.profileRole } : {}),
-        });
+        try {
+          await updateUserProfile(userId, {
+            ...(state.profileName ? { name: state.profileName } : {}),
+            ...(state.profileRole ? { preferredRole: state.profileRole } : {}),
+          });
+        } catch {
+          // Non-fatal: profile fields can be updated from the dashboard
+        }
       }
 
       // 6. Fetch full user to populate auth context with all persisted fields
