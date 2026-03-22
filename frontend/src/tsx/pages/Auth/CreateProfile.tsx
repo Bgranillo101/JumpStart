@@ -5,8 +5,8 @@ import { Input } from '../../components/Input';
 import { StepIndicator } from '../../components/stepindicator';
 import { useWizard } from '../../context/WizardContext';
 import { useAuth } from '../../context/AuthContext';
-import { registerUser, login, createStartup, addSkills, decodeJwt } from '../../api';
-import type { Skill } from '../../types';
+import { registerUser, login, createStartup, addSkills, decodeJwt, updateUserProfile, getUser } from '../../api';
+import type { Skill, User } from '../../types';
 import '../../../css/auth.css';
 
 const STEPS = [{ label: 'Choose Path' }, { label: 'Set Up' }];
@@ -81,9 +81,25 @@ export default function CreateProfile() {
         await addSkills(userId, skills);
       }
 
-      // 5. Set auth context
+      // 5. Persist profile name and role to backend if provided
+      if (state.profileName || state.profileRole) {
+        await updateUserProfile(userId, {
+          ...(state.profileName ? { name: state.profileName } : {}),
+          ...(state.profileRole ? { preferredRole: state.profileRole } : {}),
+        });
+      }
+
+      // 6. Fetch full user to populate auth context with all persisted fields
+      let fullUser: User = { userId, username: userDto.username, email: userDto.email, skills: [] };
+      try {
+        fullUser = await getUser(userId);
+      } catch {
+        // Fall back to minimal data if fetch fails
+      }
+
+      // 7. Set auth context
       authLogin(
-        { userId, username: userDto.username, email: userDto.email, skills: [] },
+        fullUser,
         loginResult.token,
         startup.id
       );

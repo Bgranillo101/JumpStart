@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/navbar';
 import LandingPage from './Landing';
 import SignIn from './pages/Auth/SignIn';
@@ -6,6 +7,15 @@ import Register from './pages/Auth/Register';
 import CreateProfile from './pages/Auth/CreateProfile';
 import JoinTeam from './pages/Auth/JoinTeam';
 import DashboardLayout from './pages/Dashboard/DashboardLayout';
+import { useAuth } from './context/AuthContext';
+
+function PrivateRoute({ children }: { children: ReactNode }) {
+  const { currentUser, startupId } = useAuth();
+  if (!currentUser || !startupId) {
+    return <Navigate to="/auth/sign-in" replace />;
+  }
+  return <>{children}</>;
+}
 
 function AppContent() {
   const location = useLocation();
@@ -20,7 +30,7 @@ function AppContent() {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/create-profile" element={<CreateProfile />} />
         <Route path="/auth/join-team" element={<JoinTeam />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
+        <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>} />
       </Routes>
     </>
   );

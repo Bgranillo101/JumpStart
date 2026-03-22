@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/buttons';
 import { Input } from '../../components/Input';
 import { useAuth } from '../../context/AuthContext';
-import { login, decodeJwt } from '../../api';
+import { login, decodeJwt, getUser } from '../../api';
+import type { User } from '../../types';
 import '../../../css/auth.css';
 
 export default function SignIn() {
@@ -29,8 +30,17 @@ export default function SignIn() {
     const { userId, sub } = decodeJwt(result.token);
     const startupId = localStorage.getItem('startupId');
 
+    // Fetch full user object from backend so auth context has complete data
+    let fullUser: User = { userId, username: sub, email: '', skills: [] };
+    try {
+      const fetched = await getUser(userId);
+      fullUser = fetched;
+    } catch {
+      // Fall back to minimal user if fetch fails
+    }
+
     authLogin(
-      { userId, username: sub, email: '', skills: [] },
+      fullUser,
       result.token,
       startupId ? parseInt(startupId) : undefined
     );

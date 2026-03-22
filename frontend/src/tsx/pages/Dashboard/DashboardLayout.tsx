@@ -31,22 +31,52 @@ export default function DashboardLayout() {
   const [heatmapData, setHeatmapData] = useState<SkillData[]>([]);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!startupId) return;
-    getTeam(startupId).then(setStartup).catch(() => { });
-    getMembers(startupId).then(setMembers).catch(() => { });
-    getTeamHeatmap(startupId)
-      .then(h => setHeatmapData(
-        h.categories.map(c => ({
-          subject: c.category,
-          value: parseFloat(c.averageProficiency.toFixed(1)),
-          fullMark: 10,
-        }))
-      ))
-      .catch(() => { });
-    getAnalysisResults(startupId).then(setAnalysis).catch(() => { });
+    if (!startupId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    Promise.allSettled([
+      getTeam(startupId),
+      getMembers(startupId),
+      getTeamHeatmap(startupId),
+      getAnalysisResults(startupId),
+    ]).then(([teamResult, membersResult, heatmapResult, analysisResult]) => {
+      if (teamResult.status === 'fulfilled') {
+        setStartup(teamResult.value);
+      } else {
+        setError('Failed to load team data. Please refresh.');
+      }
+
+      if (membersResult.status === 'fulfilled') {
+        setMembers(membersResult.value);
+      }
+
+      if (heatmapResult.status === 'fulfilled') {
+        setHeatmapData(
+          heatmapResult.value.categories.map(c => ({
+            subject: c.category,
+            value: parseFloat(c.averageProficiency.toFixed(1)),
+            fullMark: 10,
+          }))
+        );
+      }
+
+      if (analysisResult.status === 'fulfilled') {
+        setAnalysis(analysisResult.value);
+      }
+    }).catch(() => {
+      setError('An unexpected error occurred. Please refresh.');
+    }).finally(() => {
+      setLoading(false);
+    });
   }, [startupId]);
 
   const handleRunAnalysis = async () => {
@@ -121,12 +151,19 @@ export default function DashboardLayout() {
           </p>
         </div>
 
-        {error && (
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
+            <p>Loading dashboard…</p>
+          </div>
+        )}
+
+        {!loading && error && (
           <p style={{ color: 'var(--accent-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>
         )}
 
+        {/* ── Sections (only render when not loading) ───────────────────── */}
         {/* ── Overview ─────────────────────────────────────────────────────── */}
-        {activeSection === 'overview' && (
+        {!loading && activeSection === 'overview' && (
           <>
             <div className="dashboard-grid">
               {/* Startup overview */}
@@ -202,7 +239,7 @@ export default function DashboardLayout() {
         )}
 
         {/* ── Team ─────────────────────────────────────────────────────────── */}
-        {activeSection === 'team' && (
+        {!loading && activeSection === 'team' && (
           <div className="dash-section-card">
             <p className="dash-section-title">Team Members</p>
             <div className="members-list">
@@ -229,7 +266,7 @@ export default function DashboardLayout() {
         )}
 
         {/* ── Analysis ─────────────────────────────────────────────────────── */}
-        {activeSection === 'analysis' && (
+        {!loading && activeSection === 'analysis' && (
           <>
             {!analysis ? (
               <div className="dash-section-card" style={{ textAlign: 'center' }}>
@@ -289,7 +326,7 @@ export default function DashboardLayout() {
         )}
 
         {/* ── Settings ─────────────────────────────────────────────────────── */}
-        {activeSection === 'settings' && (
+        {!loading && activeSection === 'settings' && (
           <div className="dash-section-card">
             <p className="dash-section-title">Settings</p>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>

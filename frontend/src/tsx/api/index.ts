@@ -109,6 +109,29 @@ export async function addMember(startupId: number, userId: number): Promise<void
   if (!res.ok) throw new Error('Failed to add member');
 }
 
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+export async function getUser(userId: number): Promise<User> {
+  const res = await fetch(`${BASE_URL}/users/${userId}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch user');
+  return res.json();
+}
+
+export async function updateUserProfile(
+  userId: number,
+  data: { name?: string; preferredRole?: string }
+): Promise<User> {
+  const res = await fetch(`${BASE_URL}/users/${userId}`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update user profile');
+  return res.json();
+}
+
 // ─── Skills ──────────────────────────────────────────────────────────────────
 
 export async function addSkills(userId: number, skills: Skill[]): Promise<Skill[]> {
