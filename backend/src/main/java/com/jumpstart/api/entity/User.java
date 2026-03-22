@@ -1,5 +1,6 @@
 package com.jumpstart.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -40,15 +42,18 @@ public class User {
     private LocalDateTime createdAt;
 
     // --- Relationships ---
+    @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Startup> ownedStartups;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "members")
     private List<Startup> memberStartups;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Skill> skills;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoleAssignment> roleAssignments;
 

@@ -1,5 +1,6 @@
 package com.jumpstart.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,6 +46,7 @@ public class Startup {
 
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "startup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnalysisResult> analysisResults = new ArrayList<>();
 
