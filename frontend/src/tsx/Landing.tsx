@@ -73,7 +73,7 @@ export default function LandingPage() {
         </div>
         <div className="hero-arrow">
           <button className="hero-arrow-btn" onClick={scrollToAbout} aria-label="Scroll down">
-            <FontAwesomeIcon icon={faChevronDown} />
+            <FontAwesomeIcon icon={byPrefixAndName.fas['arrow-down']} />
           </button>
         </div>
       </section>
