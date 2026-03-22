@@ -146,7 +146,8 @@ export default function DashboardLayout() {
       setAnalysis(result);
       setActiveSection('analysis');
     } catch {
-      setError('Analysis failed. Make sure the team has members with skills.');
+      setToastMessage('Analysis failed. Make sure the team has members with skills.');
+      setToastVisible(true);
     } finally {
       setAnalyzing(false);
     }
@@ -160,7 +161,8 @@ export default function DashboardLayout() {
       const result = await runTechStackAnalysis(startupId);
       setTechStack(result);
     } catch {
-      setError('Tech stack generation failed. Run a team analysis first.');
+      setToastMessage('Tech stack generation failed. Run a team analysis first.');
+      setToastVisible(true);
     } finally {
       setGeneratingTechStack(false);
     }
@@ -179,7 +181,8 @@ export default function DashboardLayout() {
         heatmapElement: heatmapRef.current,
       });
     } catch {
-      setError('Failed to generate report.');
+      setToastMessage('Failed to generate report.');
+      setToastVisible(true);
     } finally {
       setGeneratingReport(false);
     }
@@ -199,7 +202,8 @@ export default function DashboardLayout() {
       setInviteLink(link);
       setInviteCopied(false);
     } catch {
-      setError('Failed to generate invite link.');
+      setToastMessage('Failed to generate invite link.');
+      setToastVisible(true);
     }
   };
 
@@ -549,7 +553,7 @@ export default function DashboardLayout() {
             {techStack.length === 0 ? (
               <div className="dash-section-card">
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDD27</span>
+                  <span className="empty-state-icon"></span>
                   <span className="empty-state-title">No tech stack recommendations yet</span>
                   <span className="empty-state-desc">Generate AI-powered technology recommendations based on your team's skills and startup goals.</span>
                   <Button variant="primary" size="md" onClick={handleRunTechStack} disabled={generatingTechStack || !startupId} style={{ marginTop: '0.5rem' }}>
