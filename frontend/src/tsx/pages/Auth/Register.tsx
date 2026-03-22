@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket, faHandshake } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +11,13 @@ const STEPS = [{ label: 'Choose Path' }, { label: 'Set Up' }];
 export default function Register() {
   const navigate = useNavigate();
   const { state, setPath } = useWizard();
+
+  useEffect(() => {
+    const pendingInvite = localStorage.getItem('pendingInviteCode');
+    if (pendingInvite) {
+      navigate('/auth/join-team');
+    }
+  }, [navigate]);
 
   const handleChoice = (choice: 'create' | 'join') => {
     setPath(choice);

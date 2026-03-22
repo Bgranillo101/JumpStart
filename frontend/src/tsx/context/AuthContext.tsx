@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('currentUser');
     localStorage.removeItem('startupId');
     localStorage.removeItem('userId');
+    localStorage.removeItem('pendingInviteCode');
     localStorage.removeItem('demo_mode');
     localStorage.removeItem('demo_startup');
     localStorage.removeItem('demo_members');

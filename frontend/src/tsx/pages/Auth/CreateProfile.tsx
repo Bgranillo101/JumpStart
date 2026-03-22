@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faFile, faPaperclip } from '@fortawesome/free-solid-svg-icons';
@@ -34,6 +34,13 @@ export default function CreateProfile() {
   const navigate = useNavigate();
   const { state, setProfileField } = useWizard();
   const { login: authLogin } = useAuth();
+
+  useEffect(() => {
+    const pendingInvite = localStorage.getItem('pendingInviteCode');
+    if (pendingInvite) {
+      navigate('/auth/join-team');
+    }
+  }, [navigate]);
 
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
