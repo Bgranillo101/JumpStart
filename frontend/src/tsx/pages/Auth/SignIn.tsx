@@ -98,7 +98,7 @@ export default function SignIn() {
             onChange={e => setPassword(e.target.value)}
             required
           />
-          {error && <p style={{ color: 'var(--accent-secondary)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{error}</p>}
+          {error && <p role="alert" style={{ color: 'var(--accent-secondary)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{error}</p>}
           <Button type="submit" variant="primary" size="lg" fullWidth disabled={loading}>
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>

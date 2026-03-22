@@ -52,6 +52,10 @@ export async function registerUser(data: {
   return res.json();
 }
 
+export async function tryDemo(): Promise<{ success: boolean; token?: string; error?: string }> {
+  return login('demo', 'demo1234');
+}
+
 // ─── Startups ────────────────────────────────────────────────────────────────
 
 export async function createStartup(data: {

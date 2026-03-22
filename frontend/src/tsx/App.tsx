@@ -38,6 +38,7 @@ function AppContent() {
     <>
       {showNavbar && <Navbar />}
       <Suspense fallback={<RouteSpinner />}>
+        <div key={location.pathname} className="page-enter">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth/sign-in" element={<SignIn />} />
@@ -48,6 +49,7 @@ function AppContent() {
           <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </div>
       </Suspense>
     </>
   );

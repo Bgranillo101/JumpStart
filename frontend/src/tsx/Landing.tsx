@@ -1,19 +1,41 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/landing.css';
 import '../css/cards.css'
 import { Button } from './components/buttons';
 import { Card } from './components/cards';
 import OrgChartBackground from './components/OrgChartBackground';
+import { tryDemo, decodeJwt, getUser, getUserStartup } from './api';
+import { useAuth } from './context/AuthContext';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
+  const [demoLoading, setDemoLoading] = useState(false);
 
   const scrollToAbout = () => {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleTryDemo = async () => {
+    setDemoLoading(true);
+    try {
+      const result = await tryDemo();
+      if (!result.success || !result.token) return;
+      const { userId } = decodeJwt(result.token);
+      const fullUser = await getUser(userId);
+      const startup = await getUserStartup(userId);
+      authLogin(fullUser, result.token, startup?.id);
+      navigate('/dashboard');
+    } catch {
+      // silently fail
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
   return (
-    <div className="landing-container">
+    <div className="landing-container" role="main">
       {/* Hero */}
       <section className="hero-section">
         <OrgChartBackground />
@@ -25,6 +47,9 @@ export default function LandingPage() {
           <div className="hero-cta">
             <Button variant="primary" size="lg" onClick={() => navigate('/auth/register')}>
               Start Building
+            </Button>
+            <Button variant="secondary" size="lg" onClick={handleTryDemo} disabled={demoLoading}>
+              {demoLoading ? 'Loading...' : 'Try Demo'}
             </Button>
             <Button variant="outline" size="lg" onClick={scrollToAbout}>
               Learn More

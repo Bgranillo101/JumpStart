@@ -256,7 +256,7 @@ export default function CreateProfile() {
           </div>
 
           {error && (
-            <p style={{ color: 'var(--accent-secondary)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
+            <p role="alert" style={{ color: 'var(--accent-secondary)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
               {error}
             </p>
           )}

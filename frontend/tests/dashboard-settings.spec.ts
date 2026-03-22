@@ -19,7 +19,7 @@ test.describe('Dashboard Settings Tab', () => {
     await expect(page).toHaveURL(/\/JumpStart\//);
   });
 
-  test('Replay Tour button exists', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Replay Tour' })).toBeVisible();
+  test('Theme toggle exists', async ({ page }) => {
+    await expect(page.getByLabel(/Switch to .* mode/)).toBeVisible();
   });
 });

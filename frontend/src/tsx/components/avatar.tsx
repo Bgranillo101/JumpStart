@@ -18,7 +18,7 @@ export const Avatar: React.FC<AvatarProps> = ({ name, src, size = 'md', classNam
 
   return (
     <div className={`avatar avatar-${size} ${className}`.trim()}>
-      {src ? <img src={src} alt={name} /> : initials}
+      {src ? <img src={src} alt={name} loading="lazy" /> : initials}
     </div>
   );
 };

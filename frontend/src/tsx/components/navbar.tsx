@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './buttons';
 import { Avatar } from './avatar';
+import { ThemeToggle } from './ThemeToggle';
 import '../../css/navbar.css';
 
 export const Navbar: React.FC = () => {
@@ -13,7 +14,7 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path ? 'navbar-link active' : 'navbar-link';
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" aria-label="Main navigation">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
           <span className="brand-gradient" >
@@ -51,6 +52,7 @@ export const Navbar: React.FC = () => {
           <div className="navbar-links">
             <Link to="/" className={isActive('/')}>Home</Link>
             <Link to="/auth/sign-in" className={isActive('/auth/sign-in')}>Sign In</Link>
+            <ThemeToggle size="sm" />
             <Button
               variant="primary"
               size="sm"

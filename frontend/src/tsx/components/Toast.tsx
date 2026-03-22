@@ -15,7 +15,7 @@ export function Toast({ message, visible, onDismiss }: ToastProps) {
   }, [visible, onDismiss]);
 
   return (
-    <div className={`toast ${visible ? 'visible' : ''}`}>
+    <div className={`toast ${visible ? 'visible' : ''}`} role="alert" aria-live="assertive">
       <span className="toast-message">{message}</span>
       <button className="toast-close" onClick={onDismiss} aria-label="Dismiss">✕</button>
     </div>

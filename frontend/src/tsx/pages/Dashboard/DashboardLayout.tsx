@@ -9,6 +9,8 @@ import { Badge } from '../../components/badge';
 import { Button } from '../../components/buttons';
 import { Toast } from '../../components/Toast';
 import { ReadinessGauge } from '../../components/ReadinessGauge';
+import { Confetti } from '../../components/Confetti';
+import { ThemeToggle } from '../../components/ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
 import { useSSE } from '../../hooks/useSSE';
 import {
@@ -56,6 +58,7 @@ export default function DashboardLayout() {
   const [inviteLink, setInviteLink] = useState('');
   const [inviteCopied, setInviteCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Sprint 2 state
   const [techStack, setTechStack] = useState<TechStackRecommendation[]>([]);
@@ -150,6 +153,8 @@ export default function DashboardLayout() {
       const result = await runAnalysis(startupId);
       setAnalysis(result);
       setActiveSection('analysis');
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3500);
     } catch {
       setToastMessage('Analysis failed. Make sure the team has members with skills.');
       setToastVisible(true);
@@ -242,13 +247,15 @@ export default function DashboardLayout() {
           </span>
         </Link>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Dashboard navigation">
           {NAV_LINKS.map(link => (
             <button
               key={link.id}
               className={`sidebar-link ${activeSection === link.id ? 'active' : ''}`}
               onClick={() => { setActiveSection(link.id); setSidebarOpen(false); }}
               data-id={link.id}
+              aria-label={`Go to ${link.label}`}
+              aria-current={activeSection === link.id ? 'page' : undefined}
             >
               <span className="sidebar-link-icon">{link.icon}</span>
               {link.label}
@@ -263,6 +270,7 @@ export default function DashboardLayout() {
               <span className="sidebar-user-name">{currentUser?.username ?? 'My Account'}</span>
               <button
                 onClick={handleLogout}
+                aria-label="Sign out of your account"
                 style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}
               >
                 Sign out
@@ -308,7 +316,7 @@ export default function DashboardLayout() {
         )}
 
         {!loading && error && (
-          <p style={{ color: 'var(--accent-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>
+          <p role="alert" style={{ color: 'var(--accent-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>
         )}
 
         {/* ── Overview ─────────────────────────────────────────────────────── */}
@@ -316,7 +324,7 @@ export default function DashboardLayout() {
           <>
             <div className="dashboard-grid">
               {/* Startup overview */}
-              <div className="dash-section-card">
+              <div className="dash-section-card card-stagger">
                 <p className="dash-section-title">Team Overview</p>
                 {startup ? (
                   <>
@@ -334,7 +342,7 @@ export default function DashboardLayout() {
               </div>
 
               {/* Readiness score or Analysis CTA */}
-              <div className="dash-section-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+              <div className="dash-section-card card-stagger" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
                 {analysis?.teamReadinessScore != null ? (
                   <ReadinessGauge score={analysis.teamReadinessScore} />
                 ) : (
@@ -353,7 +361,7 @@ export default function DashboardLayout() {
 
             {/* Skill radar */}
             {heatmapData.length === 0 && (
-              <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+              <div className="dash-section-card card-stagger" style={{ marginBottom: 'var(--spacing-xl)' }}>
                 <p className="dash-section-title">Team Skill Heatmap</p>
                 <div className="empty-state">
                   <span className="empty-state-icon">\uD83D\uDCCA</span>
@@ -363,7 +371,7 @@ export default function DashboardLayout() {
               </div>
             )}
             {heatmapData.length > 0 && (
-              <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }} ref={heatmapRef}>
+              <div className="dash-section-card card-stagger" style={{ marginBottom: 'var(--spacing-xl)' }} ref={heatmapRef}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <p className="dash-section-title" style={{ margin: 0 }}>Team Skill Heatmap</p>
                   {aiHeatmap && (
@@ -399,7 +407,7 @@ export default function DashboardLayout() {
             )}
 
             {/* Members list */}
-            <div className="dash-section-card">
+            <div className="dash-section-card card-stagger">
               <p className="dash-section-title">Team Members</p>
               <div className="members-list">
                 {members.map(member => (
@@ -432,7 +440,7 @@ export default function DashboardLayout() {
         {!loading && activeSection === 'team' && (
           <>
             {isOwner && (
-              <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+              <div className="dash-section-card card-stagger" style={{ marginBottom: 'var(--spacing-xl)' }}>
                 <p className="dash-section-title">Invite Members</p>
                 {!inviteLink ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -470,7 +478,7 @@ export default function DashboardLayout() {
               </div>
             )}
 
-          <div className="dash-section-card">
+          <div className="dash-section-card card-stagger">
             <p className="dash-section-title">Team Members</p>
             <div className="members-list">
               {members.map(member => (
@@ -504,7 +512,7 @@ export default function DashboardLayout() {
         {!loading && activeSection === 'analysis' && (
           <>
             {!analysis ? (
-              <div className="dash-section-card">
+              <div className="dash-section-card card-stagger">
                 <div className="empty-state">
                   <span className="empty-state-icon">\u26A1</span>
                   <span className="empty-state-title">No analysis results yet</span>
@@ -524,7 +532,7 @@ export default function DashboardLayout() {
                 </div>
 
                 {/* Role assignments */}
-                <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <div className="dash-section-card card-stagger" style={{ marginBottom: 'var(--spacing-xl)' }}>
                   <p className="dash-section-title">Role Assignments</p>
                   <div className="members-list">
                     {analysis.roleAssignments.map(ra => (
@@ -546,7 +554,7 @@ export default function DashboardLayout() {
                 </div>
 
                 {/* Role gaps */}
-                <div className="dash-section-card">
+                <div className="dash-section-card card-stagger">
                   <p className="dash-section-title">Role Gaps</p>
                   <div className="members-list">
                     {analysis.roleGaps.map(gap => (
@@ -575,7 +583,7 @@ export default function DashboardLayout() {
         {!loading && activeSection === 'techstack' && (
           <>
             {techStack.length === 0 ? (
-              <div className="dash-section-card">
+              <div className="dash-section-card card-stagger">
                 <div className="empty-state">
                   <span className="empty-state-icon"></span>
                   <span className="empty-state-title">No tech stack recommendations yet</span>
@@ -622,11 +630,15 @@ export default function DashboardLayout() {
 
         {/* ── Settings ─────────────────────────────────────────────────────── */}
         {!loading && activeSection === 'settings' && (
-          <div className="dash-section-card">
+          <div className="dash-section-card card-stagger">
             <p className="dash-section-title">Settings</p>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
               Startup ID: <code>{startupId ?? '\u2014'}</code>
             </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Theme</span>
+              <ThemeToggle />
+            </div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <Button variant="outline" size="md" onClick={handleLogout}>Sign Out</Button>
             </div>
@@ -636,6 +648,7 @@ export default function DashboardLayout() {
 
       {/* Toast notification */}
       <Toast message={toastMessage} visible={toastVisible} onDismiss={() => setToastVisible(false)} />
+      {showConfetti && <Confetti />}
     </div>
   );
 }

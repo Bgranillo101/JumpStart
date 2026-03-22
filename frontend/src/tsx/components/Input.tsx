@@ -18,8 +18,8 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className={`input-group ${className}`}>
       {label && <label htmlFor={inputId} className="input-label">{label}</label>}
-      <input id={inputId} className={`input-field ${error ? 'input-error' : ''}`} {...props} />
-      {error && <span className="input-error-text">{error}</span>}
+      <input id={inputId} className={`input-field ${error ? 'input-error' : ''}`} aria-invalid={!!error} aria-describedby={error ? `${inputId}-error` : undefined} {...props} />
+      {error && <span id={`${inputId}-error`} className="input-error-text" role="alert">{error}</span>}
     </div>
   );
 };
