@@ -7,6 +7,7 @@ interface AuthContextValue {
   setStartupId: (id: number) => void;
   login: (user: User, token: string, startupId?: number) => void;
   logout: () => void;
+  updateCurrentUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,8 +55,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStartupId(null);
   };
 
+  const updateCurrentUser = (user: User) => {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    setCurrentUser(user);
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, startupId, setStartupId: (id: number) => { localStorage.setItem('startupId', String(id)); setStartupId(id); }, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, startupId, setStartupId: (id: number) => { localStorage.setItem('startupId', String(id)); setStartupId(id); }, login, logout, updateCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

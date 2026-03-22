@@ -3,13 +3,25 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './buttons';
 import { Avatar } from './avatar';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '../context/AuthContext';
 import '../../css/navbar.css';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isDashboard = location.pathname.startsWith('/dashboard');
+  const { currentUser, logout } = useAuth();
+  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/profile');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const avatarSrc = currentUser?.userId != null
+    ? (localStorage.getItem(`avatar_${currentUser.userId}`) ?? undefined)
+    : undefined;
+
+  const handleSignOut = () => {
+    setDropdownOpen(false);
+    logout();
+    navigate('/');
+  };
 
   const isActive = (path: string) => location.pathname === path ? 'navbar-link active' : 'navbar-link';
 
@@ -31,7 +43,7 @@ export const Navbar: React.FC = () => {
                 className="navbar-avatar-btn"
                 onClick={() => setDropdownOpen(o => !o)}
               >
-                <Avatar name="User" size="sm" />
+                <Avatar name={currentUser?.name ?? currentUser?.username ?? 'User'} src={avatarSrc} size="sm" />
               </button>
               {dropdownOpen && (
                 <div className="navbar-dropdown">
@@ -40,7 +52,7 @@ export const Navbar: React.FC = () => {
                   </Link>
                   <button
                     className="dropdown-item dropdown-item-danger"
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={handleSignOut}
                   >
                     Sign Out
                   </button>

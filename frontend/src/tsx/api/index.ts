@@ -134,7 +134,14 @@ export async function getUserStartup(userId: number): Promise<Startup | null> {
 
 export async function updateUserProfile(
   userId: number,
-  data: { name?: string; preferredRole?: string }
+  data: {
+    name?: string;
+    preferredRole?: string;
+    headline?: string;
+    experienceYears?: number;
+    availabilityLevel?: string;
+    education?: string;
+  }
 ): Promise<User> {
   const res = await fetch(`${BASE_URL}/users/${userId}`, {
     method: 'PATCH',
@@ -142,6 +149,27 @@ export async function updateUserProfile(
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error('Failed to update user profile');
+  return res.json();
+}
+
+export async function removeSkill(userId: number, skillId: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/users/${userId}/skills/${skillId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to remove skill');
+}
+
+export async function updateStartup(
+  startupId: number,
+  data: { name?: string; productDescription?: string; businessModel?: string; keyChallenges?: string }
+): Promise<Startup> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update startup');
   return res.json();
 }
 

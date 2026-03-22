@@ -33,11 +33,26 @@ public class IntegrationSkillService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
 
-    public User updateUserProfile(Long userId, String name, String preferredRole) {
+    public User updateUserProfile(Long userId, String name, String preferredRole,
+                                   String headline, Integer experienceYears,
+                                   String availabilityLevel, String education) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         if (name != null) user.setName(name);
         if (preferredRole != null) user.setPreferredRole(preferredRole);
+        if (headline != null) user.setHeadline(headline);
+        if (experienceYears != null) user.setExperienceYears(experienceYears);
+        if (availabilityLevel != null) user.setAvailabilityLevel(availabilityLevel);
+        if (education != null) user.setEducation(education);
         return userRepository.save(user);
+    }
+
+    public void removeSkill(Long userId, Long skillId) {
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new ResourceNotFoundException("Skill", skillId));
+        if (!skill.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("Skill does not belong to this user");
+        }
+        skillRepository.delete(skill);
     }
 }

@@ -295,17 +295,25 @@ export default function DashboardLayout() {
 
         <div className="sidebar-footer">
           <div className="sidebar-user">
-            <Avatar name={currentUser?.username ?? 'User'} size="sm" />
-            <div className="sidebar-user-info">
-              <span className="sidebar-user-name">{currentUser?.username ?? 'My Account'}</span>
-              <button
-                onClick={handleLogout}
-                aria-label="Sign out of your account"
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}
-              >
-                Sign out
-              </button>
-            </div>
+            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none', flex: 1, minWidth: 0 }}>
+              <Avatar
+                name={currentUser?.name ?? currentUser?.username ?? 'User'}
+                src={currentUser?.userId != null ? (localStorage.getItem(`avatar_${currentUser.userId}`) ?? undefined) : undefined}
+                size="sm"
+              />
+              <div className="sidebar-user-info">
+                <span className="sidebar-user-name">{currentUser?.name ?? currentUser?.username ?? 'My Account'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>View profile</span>
+              </div>
+            </Link>
+            <button
+              onClick={handleLogout}
+              aria-label="Sign out of your account"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem', padding: '0.25rem', flexShrink: 0 }}
+              title="Sign out"
+            >
+              ⏻
+            </button>
           </div>
         </div>
       </aside>
