@@ -14,6 +14,7 @@ export interface User {
   preferredRole?: string;
   experienceYears?: number;
   availabilityLevel?: string;
+  education?: string;
   skills: Skill[];
 }
 

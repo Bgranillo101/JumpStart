@@ -7,6 +7,7 @@ interface AuthContextValue {
   setStartupId: (id: number) => void;
   login: (user: User, token: string, startupId?: number) => void;
   logout: () => void;
+  updateCurrentUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,12 +45,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('currentUser');
     localStorage.removeItem('startupId');
     localStorage.removeItem('userId');
+    localStorage.removeItem('demo_mode');
+    localStorage.removeItem('demo_startup');
+    localStorage.removeItem('demo_members');
+    localStorage.removeItem('demo_heatmap');
+    localStorage.removeItem('demo_analysis');
+    localStorage.removeItem('demo_techstack');
     setCurrentUser(null);
     setStartupId(null);
   };
 
+  const updateCurrentUser = (user: User) => {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    setCurrentUser(user);
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, startupId, setStartupId: (id: number) => { localStorage.setItem('startupId', String(id)); setStartupId(id); }, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, startupId, setStartupId: (id: number) => { localStorage.setItem('startupId', String(id)); setStartupId(id); }, login, logout, updateCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

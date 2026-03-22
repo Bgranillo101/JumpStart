@@ -9,7 +9,10 @@ import { Card } from './components/cards';
 import OrgChartBackground from './components/OrgChartBackground';
 import { tryDemo, decodeJwt, getUser, getUserStartup } from './api';
 import { useAuth } from './context/AuthContext';
-import type { User } from './types';
+import {
+  DEMO_USER, DEMO_STARTUP, DEMO_MEMBERS, DEMO_HEATMAP,
+  DEMO_ANALYSIS, DEMO_TECH_STACK,
+} from './data/demo';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -31,24 +34,15 @@ export default function LandingPage() {
       authLogin(fullUser, result.token, startup?.id);
       navigate('/dashboard');
     } catch {
-      // Backend not running — log in with offline demo data
-      const demoUser: User = {
-        userId: 0,
-        username: 'demo',
-        email: 'demo@jumpstart.app',
-        name: 'Demo User',
-        headline: 'Full-Stack Developer',
-        preferredRole: 'CTO',
-        experienceYears: 3,
-        skills: [
-          { id: 1, name: 'React', category: 'TECHNICAL', proficiencyLevel: 8 },
-          { id: 2, name: 'Java', category: 'TECHNICAL', proficiencyLevel: 7 },
-          { id: 3, name: 'Figma', category: 'DESIGN', proficiencyLevel: 6 },
-          { id: 4, name: 'SEO', category: 'MARKETING', proficiencyLevel: 5 },
-        ],
-      };
-      const fakeToken = `eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.${btoa(JSON.stringify({ sub: 'demo', userId: 0 }))}.demo`;
-      authLogin(demoUser, fakeToken, undefined);
+      // Backend not running — seed offline demo data
+      const fakeToken = `eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.${btoa(JSON.stringify({ sub: 'demo', userId: 1 }))}.demo`;
+      localStorage.setItem('demo_mode', 'true');
+      localStorage.setItem('demo_startup', JSON.stringify(DEMO_STARTUP));
+      localStorage.setItem('demo_members', JSON.stringify(DEMO_MEMBERS));
+      localStorage.setItem('demo_heatmap', JSON.stringify(DEMO_HEATMAP));
+      localStorage.setItem('demo_analysis', JSON.stringify(DEMO_ANALYSIS));
+      localStorage.setItem('demo_techstack', JSON.stringify(DEMO_TECH_STACK));
+      authLogin(DEMO_USER, fakeToken, DEMO_STARTUP.id);
       navigate('/dashboard');
     } finally {
       setDemoLoading(false);

@@ -12,6 +12,7 @@ const CreateProfile = lazy(() => import('./pages/Auth/CreateProfile'));
 const JoinTeam = lazy(() => import('./pages/Auth/JoinTeam'));
 const JoinByInvite = lazy(() => import('./pages/Auth/JoinByInvite'));
 const DashboardLayout = lazy(() => import('./pages/Dashboard/DashboardLayout'));
+const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function RouteSpinner() {
@@ -47,6 +48,7 @@ function AppContent() {
           <Route path="/auth/join-team" element={<JoinTeam />} />
           <Route path="/join" element={<JoinByInvite />} />
           <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </div>

@@ -31,8 +31,17 @@ public class IntegrationUserController {
     public ResponseEntity<User> updateUserProfile(
             @PathVariable Long userId,
             @RequestBody UpdateProfileRequest request) {
-        User updated = skillService.updateUserProfile(userId, request.getName(), request.getPreferredRole());
+        User updated = skillService.updateUserProfile(userId, request.getName(), request.getPreferredRole(),
+                request.getHeadline(), request.getExperienceYears(), request.getAvailabilityLevel(), request.getEducation());
         return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{userId}/skills/{skillId}")
+    public ResponseEntity<Void> removeSkill(
+            @PathVariable Long userId,
+            @PathVariable Long skillId) {
+        skillService.removeSkill(userId, skillId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{userId}/startup")
@@ -56,5 +65,9 @@ public class IntegrationUserController {
     static class UpdateProfileRequest {
         private String name;
         private String preferredRole;
+        private String headline;
+        private Integer experienceYears;
+        private String availabilityLevel;
+        private String education;
     }
 }
