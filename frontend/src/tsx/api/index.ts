@@ -1,6 +1,6 @@
 import type { Startup, User, AnalysisResult, TeamSkillHeatmap, SkillData, Skill, TechStackRecommendation } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://bgranillo101.github.io/JumpStart';
 
 function authHeaders(): HeadersInit {
   const token = localStorage.getItem('jwt');
