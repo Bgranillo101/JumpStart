@@ -9,7 +9,6 @@ import { Badge } from '../../components/badge';
 import { Button } from '../../components/buttons';
 import { Toast } from '../../components/Toast';
 import { ReadinessGauge } from '../../components/ReadinessGauge';
-import { OnboardingTour } from '../../components/OnboardingTour';
 import { useAuth } from '../../context/AuthContext';
 import { useSSE } from '../../hooks/useSSE';
 import {
@@ -21,9 +20,9 @@ import '../../../css/dashboard.css';
 
 const NAV_LINKS = [
   { icon: '\u2B21', label: 'Overview', id: 'overview' },
-  { icon: '\uD83D\uDC65', label: 'Team', id: 'team' },
+  { icon: '👥', label: 'Team', id: 'team' },
   { icon: '\u26A1', label: 'Analysis', id: 'analysis' },
-  { icon: '\uD83D\uDD27', label: 'Tech Stack', id: 'techstack' },
+  { icon: '🔧', label: 'Tech Stack', id: 'techstack' },
   { icon: '\u2699', label: 'Settings', id: 'settings' },
 ];
 
@@ -210,11 +209,6 @@ export default function DashboardLayout() {
     setTimeout(() => setInviteCopied(false), 2000);
   };
 
-  const handleReplayTour = () => {
-    localStorage.removeItem('jumpstart_tour_completed');
-    window.location.reload();
-  };
-
   // Group tech stack by category
   const techStackByCategory = techStack.reduce<Record<string, TechStackRecommendation[]>>((acc, rec) => {
     (acc[rec.category] ??= []).push(rec);
@@ -239,7 +233,7 @@ export default function DashboardLayout() {
           </span>
         </Link>
 
-        <nav className="sidebar-nav" data-tour="sidebar-nav">
+        <nav className="sidebar-nav">
           {NAV_LINKS.map(link => (
             <button
               key={link.id}
@@ -273,7 +267,7 @@ export default function DashboardLayout() {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <h1 className="dashboard-greeting">
-            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''} \uD83D\uDC4B
+            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''}
           </h1>
           <p className="dashboard-subtitle">
             {startup?.name ?? 'Loading your startup\u2026'}
@@ -313,7 +307,7 @@ export default function DashboardLayout() {
           <>
             <div className="dashboard-grid">
               {/* Startup overview */}
-              <div className="dash-section-card" data-tour="team-overview">
+              <div className="dash-section-card">
                 <p className="dash-section-title">Team Overview</p>
                 {startup ? (
                   <>
@@ -342,7 +336,7 @@ export default function DashboardLayout() {
                     </p>
                   </>
                 )}
-                <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId} data-tour="run-analysis">
+                <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId}>
                   {analyzing ? 'Analyzing\u2026' : analysis ? 'Re-run Analysis' : 'Run Analysis'}
                 </Button>
               </div>
@@ -396,7 +390,7 @@ export default function DashboardLayout() {
                 ))}
                 {members.length === 0 && (
                   <div className="empty-state">
-                    <span className="empty-state-icon">\uD83D\uDC65</span>
+                    <span className="empty-state-icon"></span>
                     <span className="empty-state-title">No team members yet</span>
                     <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
                   </div>
@@ -468,7 +462,7 @@ export default function DashboardLayout() {
               ))}
               {members.length === 0 && (
                 <div className="empty-state">
-                  <span className="empty-state-icon">\uD83D\uDC65</span>
+                  <span className="empty-state-icon"></span>
                   <span className="empty-state-title">No team members yet</span>
                   <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
                 </div>
@@ -607,7 +601,6 @@ export default function DashboardLayout() {
             </p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <Button variant="outline" size="md" onClick={handleLogout}>Sign Out</Button>
-              <Button variant="ghost" size="md" onClick={handleReplayTour}>Replay Tour</Button>
             </div>
           </div>
         )}
@@ -615,9 +608,6 @@ export default function DashboardLayout() {
 
       {/* Toast notification */}
       <Toast message={toastMessage} visible={toastVisible} onDismiss={() => setToastVisible(false)} />
-
-      {/* Onboarding tour (first-time users) */}
-      {!loading && <OnboardingTour />}
     </div>
   );
 }
