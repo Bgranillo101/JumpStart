@@ -37,8 +37,6 @@
   --padding-bottom: 0rem;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(ellipse at top, var(--accent-ghost) 0%, transparent 55%),
-              radial-gradient(ellipse at bottom right, var(--tertiary-bg) 0%, transparent 50%);
 }
 
 .hero-content {
@@ -73,35 +71,63 @@
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: orgNodeIn 0.5s ease forwards, orgPulse 3.5s ease-in-out 1.5s infinite;
+  animation:
+    orgNodeIn 0.5s ease forwards,
+    orgPulse 3.5s ease-in-out 1.5s infinite;
 }
 
 .org-node-pulse-ceo {
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: orgNodeIn 0.5s ease forwards, orgPulseCeo 4s ease-in-out 1s infinite;
+  animation:
+    orgNodeIn 0.5s ease forwards,
+    orgPulseCeo 4s ease-in-out 1s infinite;
 }
 
 @keyframes orgLineDraw {
-  0%   { opacity: 0; stroke-dashoffset: 1000; }
-  20%  { opacity: 1; }
-  100% { opacity: 1; stroke-dashoffset: 0; }
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 1000;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes orgNodeIn {
-  0%   { opacity: 0; transform: scale(0.75); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes orgPulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.06); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
 }
 
 @keyframes orgPulseCeo {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.08); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
 }
 
 .hero-title {
@@ -266,7 +292,11 @@
 }
 
 .about-headline-accent {
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
