@@ -11,17 +11,17 @@ interface Piece {
 }
 
 export function Confetti({ duration = 3000 }: { duration?: number }) {
-  const [pieces, setPieces] = useState<Piece[]>([]);
-
-  useEffect(() => {
-    const items: Piece[] = Array.from({ length: 40 }, (_, i) => ({
+  const [pieces, setPieces] = useState<Piece[]>(() =>
+    Array.from({ length: 40 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       delay: Math.random() * 0.8,
       size: 6 + Math.random() * 6,
-    }));
-    setPieces(items);
+    }))
+  );
+
+  useEffect(() => {
     const timer = setTimeout(() => setPieces([]), duration);
     return () => clearTimeout(timer);
   }, [duration]);

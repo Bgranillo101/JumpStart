@@ -275,6 +275,6 @@ export function getSSEUrl(startupId: number): string {
 }
 
 // Keep old register signature for any call sites that haven't been updated yet
-export async function register(_data: object): Promise<{ success: boolean }> {
+export async function register(): Promise<{ success: boolean }> {
   return { success: true };
 }

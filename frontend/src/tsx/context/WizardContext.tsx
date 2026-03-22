@@ -45,6 +45,7 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWizard = () => {
   const ctx = useContext(WizardContext);
   if (!ctx) throw new Error('useWizard must be used inside WizardProvider');

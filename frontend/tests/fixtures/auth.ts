@@ -1,9 +1,5 @@
 import type { Page } from '@playwright/test';
 
-// Structurally valid fake JWT (header.payload.signature)
-// Payload: { "userId": 1, "sub": "testuser", "iat": 9999999999, "exp": 9999999999 }
-const FAKE_JWT_PAYLOAD = btoa(JSON.stringify({ userId: 1, sub: 'testuser', iat: 9999999999, exp: 9999999999 }));
-const FAKE_JWT = `eyJhbGciOiJIUzI1NiJ9.${FAKE_JWT_PAYLOAD}.fakesignature`;
 
 export const MOCK_USER = {
   userId: 1,

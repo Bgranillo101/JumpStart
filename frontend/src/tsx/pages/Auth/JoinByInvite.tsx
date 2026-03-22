@@ -16,7 +16,9 @@ export default function JoinByInvite() {
 
   useEffect(() => {
     if (!code) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('error');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('No invite code found in this link.');
       return;
     }

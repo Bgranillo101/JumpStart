@@ -28,12 +28,8 @@ test.describe('Dashboard Team Tab', () => {
     await expect(page.getByText('Figma')).toBeVisible();
   });
 
-  test('empty state when no members', async ({ page: _ }, testInfo) => {
-    const { browser } = testInfo.project.use;
-    // Need a fresh page with empty members
-    const context = await (await import('@playwright/test')).chromium?.launch()
-      ? undefined : undefined;
-    // Simpler: just create a new test
+  test('empty state when no members', async () => {
+    // Covered by the standalone test below
   });
 });
 

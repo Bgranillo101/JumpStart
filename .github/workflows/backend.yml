@@ -45,6 +45,7 @@ jobs:
 
     steps:
       - name: Trigger Render deploy hook
+        working-directory: ${{ github.workspace }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
             --fail \

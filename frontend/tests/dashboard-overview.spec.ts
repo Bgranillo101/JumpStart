@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { seedAuthNoTour } from './fixtures/auth';
-import { mockDashboardAPIs, MOCK_STARTUP, MOCK_ANALYSIS } from './fixtures/api-mocks';
+import { mockDashboardAPIs, MOCK_STARTUP } from './fixtures/api-mocks';
 
 test.describe('Dashboard Overview Tab', () => {
   test('shows team overview card with startup name and member count', async ({ page }) => {

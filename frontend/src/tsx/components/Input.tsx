@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import '../../css/components.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -6,14 +6,15 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ 
-  label, 
-  error, 
-  className = '', 
+export const Input: React.FC<InputProps> = ({
+  label,
+  error,
+  className = '',
   id,
-  ...props 
+  ...props
 }) => {
-  const inputId = id || Math.random().toString(36).substring(2, 9);
+  const generatedId = useId();
+  const inputId = id || generatedId;
   
   return (
     <div className={`input-group ${className}`}>
