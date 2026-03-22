@@ -31,6 +31,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [startupId, setStartupId] = useState<number | null>(hydrateStartupId);
 
   const login = (user: User, token: string, sid?: number) => {
+    // Clear any leftover demo data
+    localStorage.removeItem('demo_mode');
+    localStorage.removeItem('demo_startup');
+    localStorage.removeItem('demo_members');
+    localStorage.removeItem('demo_heatmap');
+    localStorage.removeItem('demo_analysis');
+    localStorage.removeItem('demo_techstack');
+
     localStorage.setItem('jwt', token);
     localStorage.setItem('currentUser', JSON.stringify(user));
     if (sid != null) {
