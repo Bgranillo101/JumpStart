@@ -1,4 +1,12 @@
 import React, { useEffect, useRef } from 'react';
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceX,
+  forceY,
+} from 'd3-force';
+import type { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
 
 const nodes = [
   { id: 'ceo',    x: 700,  y: 110, r: 32, label: 'CEO',  level: 0 },
@@ -43,9 +51,6 @@ const edges: { from: NodeId; to: NodeId }[] = [
 
 const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n])) as Record<NodeId, (typeof nodes)[number]>;
 
-// Each level has a different parallax strength — deeper levels drift more
-const levelStrength = [8, 20, 34, 50];
-
 const levelColors = [
   { stroke: 'rgba(255,221,0,0.55)',   fill: 'rgba(255,221,0,0.07)',   text: 'rgba(255,221,0,0.75)'   },
   { stroke: 'rgba(255,255,255,0.28)', fill: 'rgba(255,255,255,0.06)', text: 'rgba(255,255,255,0.55)' },
@@ -53,64 +58,122 @@ const levelColors = [
   { stroke: 'rgba(255,255,255,0.12)', fill: 'rgba(255,255,255,0.02)', text: 'rgba(255,255,255,0.28)' },
 ];
 
+interface PhysicsNode extends SimulationNodeDatum {
+  id: string;
+  baseX: number;
+  baseY: number;
+  r: number;
+  label: string;
+  level: number;
+}
+
+type PhysicsEdge = SimulationLinkDatum<PhysicsNode>;
+
 export default function OrgChartBackground() {
   const nodeRefs = useRef<Record<string, SVGGElement | null>>({});
   const lineRefs = useRef<Record<string, SVGLineElement | null>>({});
-  const mouse = useRef({ x: 0, y: 0 });
-  const offsets = useRef(
-    Object.fromEntries(nodes.map(n => [n.id, { x: 0, y: 0 }]))
-  ) as React.MutableRefObject<Record<string, { x: number; y: number }>>;
-  const raf = useRef<number>(0);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const mouse = useRef({ x: 700, y: 380 }); // SVG viewBox center as default
 
   useEffect(() => {
+    const mutableNodes: PhysicsNode[] = nodes.map(n => ({
+      id: n.id,
+      baseX: n.x,
+      baseY: n.y,
+      x: n.x,
+      y: n.y,
+      r: n.r,
+      label: n.label,
+      level: n.level,
+    }));
+
+    const mutableEdges: PhysicsEdge[] = edges.map(e => ({
+      source: e.from as string,
+      target: e.to as string,
+    }));
+
+    const simulation = forceSimulation(mutableNodes)
+      .alphaTarget(0.01)
+      .velocityDecay(0.15)
+      .force('x', forceX<PhysicsNode>(d => d.baseX).strength(0.05))
+      .force('y', forceY<PhysicsNode>(d => d.baseY).strength(0.05))
+      .force('charge', forceManyBody().strength(-150))
+      .force(
+        'link',
+        forceLink<PhysicsNode, PhysicsEdge>(mutableEdges)
+          .id(d => d.id)
+          .distance(100)
+          .strength(0.2),
+      );
+
     const onMouseMove = (e: MouseEvent) => {
+      const svgEl = svgRef.current;
+      if (!svgEl) return;
+      const rect = svgEl.getBoundingClientRect();
+      // Map from client pixels → SVG viewBox (1400×760), accounting for xMidYMid slice
+      const viewBoxScale = Math.max(rect.width / 1400, rect.height / 760);
+      const scaledW = 1400 * viewBoxScale;
+      const scaledH = 760 * viewBoxScale;
+      const offsetX = (scaledW - rect.width) / 2;
+      const offsetY = (scaledH - rect.height) / 2;
       mouse.current = {
-        x: e.clientX / window.innerWidth - 0.5,
-        y: e.clientY / window.innerHeight - 0.5,
+        x: (e.clientX - rect.left + offsetX) / viewBoxScale,
+        y: (e.clientY - rect.top + offsetY) / viewBoxScale,
       };
     };
 
-    const animate = () => {
-      const renderedPos: Record<string, { x: number; y: number }> = {};
+    simulation.on('tick', () => {
+      const time = Date.now() * 0.001;
+      const { x: mouseX, y: mouseY } = mouse.current;
 
-      nodes.forEach(node => {
-        const strength = levelStrength[node.level];
-        const off = offsets.current[node.id];
+      mutableNodes.forEach((node, i) => {
+        // Idle floating
+        node.vx! += Math.sin(time + i) * 0.05;
+        node.vy! += Math.cos(time + i) * 0.05;
 
-        off.x += (-mouse.current.x * strength - off.x) * 0.05;
-        off.y += (-mouse.current.y * strength - off.y) * 0.05;
+        // Mouse repulsion
+        const dx = (node.x ?? node.baseX) - mouseX;
+        const dy = (node.y ?? node.baseY) - mouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150 && dist > 0) {
+          const force = (150 - dist) / 150;
+          node.vx! += (dx / dist) * force * 0.8;
+          node.vy! += (dy / dist) * force * 0.8;
+        }
 
-        renderedPos[node.id] = { x: node.x + off.x, y: node.y + off.y };
-
+        // Update node DOM position as offset from original
         const el = nodeRefs.current[node.id];
-        if (el) el.setAttribute('transform', `translate(${off.x},${off.y})`);
-      });
-
-      edges.forEach(({ from, to }) => {
-        const el = lineRefs.current[`${from}-${to}`];
         if (el) {
-          const a = renderedPos[from];
-          const b = renderedPos[to];
-          el.setAttribute('x1', String(a.x));
-          el.setAttribute('y1', String(a.y));
-          el.setAttribute('x2', String(b.x));
-          el.setAttribute('y2', String(b.y));
+          const tx = (node.x ?? node.baseX) - node.baseX;
+          const ty = (node.y ?? node.baseY) - node.baseY;
+          el.setAttribute('transform', `translate(${tx},${ty})`);
         }
       });
 
-      raf.current = requestAnimationFrame(animate);
-    };
+      // Update edge line endpoints
+      mutableEdges.forEach(edge => {
+        const src = edge.source as PhysicsNode;
+        const tgt = edge.target as PhysicsNode;
+        const el = lineRefs.current[`${src.id}-${tgt.id}`];
+        if (el) {
+          el.setAttribute('x1', String(src.x ?? src.baseX));
+          el.setAttribute('y1', String(src.y ?? src.baseY));
+          el.setAttribute('x2', String(tgt.x ?? tgt.baseX));
+          el.setAttribute('y2', String(tgt.y ?? tgt.baseY));
+        }
+      });
+    });
 
     window.addEventListener('mousemove', onMouseMove);
-    raf.current = requestAnimationFrame(animate);
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
-      cancelAnimationFrame(raf.current);
+      simulation.stop();
     };
   }, []);
 
   return (
     <svg
+      ref={svgRef}
       className="org-chart-bg"
       viewBox="0 0 1400 760"
       preserveAspectRatio="xMidYMid slice"
@@ -144,7 +207,7 @@ export default function OrgChartBackground() {
             ? ' org-node-pulse-ceo'
             : node.level === 1 ? ' org-node-pulse' : '';
           return (
-            // Outer g: JavaScript sets the parallax transform here
+            // Outer g: d3-force sets the physics transform here
             <g key={node.id} ref={el => { nodeRefs.current[node.id] = el; }}>
               {/* Inner g: CSS handles the fade/scale animation without conflicting */}
               <g className={`org-node${pulseClass}`} style={{ animationDelay: delay }}>
