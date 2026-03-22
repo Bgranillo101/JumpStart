@@ -11,6 +11,19 @@ import '../../../css/auth.css';
 
 const STEPS = [{ label: 'Choose Path' }, { label: 'Set Up' }];
 
+function validateEmail(email: string): string {
+  if (!email) return '';
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!re.test(email)) return 'Please enter a valid email address.';
+  return '';
+}
+
+function validatePassword(password: string): string {
+  if (!password) return '';
+  if (password.length < 8) return 'Password must be at least 8 characters.';
+  return '';
+}
+
 export default function JoinTeam() {
   const navigate = useNavigate();
   const { state, setProfileField } = useWizard();
@@ -22,6 +35,7 @@ export default function JoinTeam() {
   const [loading, setLoading] = useState(false);
   const [joining, setJoining] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +52,21 @@ export default function JoinTeam() {
     }
   };
 
+  const handleBlur = (field: string) => {
+    const errors = { ...fieldErrors };
+    if (field === 'email') errors.email = validateEmail(state.email);
+    if (field === 'password') errors.password = validatePassword(state.password);
+    setFieldErrors(errors);
+  };
+
   const handleJoin = async (startup: Startup) => {
+    const emailErr = validateEmail(state.email);
+    const passErr = validatePassword(state.password);
+    if (emailErr || passErr) {
+      setFieldErrors({ email: emailErr, password: passErr });
+      return;
+    }
+
     setError('');
     setJoining(startup.id);
     try {
@@ -97,7 +125,9 @@ export default function JoinTeam() {
           type="email"
           placeholder="you@example.com"
           value={state.email}
-          onChange={e => setProfileField('email', e.target.value)}
+          onChange={e => { setProfileField('email', e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
+          onBlur={() => handleBlur('email')}
+          error={fieldErrors.email}
           required
         />
         <Input
@@ -105,11 +135,13 @@ export default function JoinTeam() {
           type="password"
           placeholder="••••••••"
           value={state.password}
-          onChange={e => setProfileField('password', e.target.value)}
+          onChange={e => { setProfileField('password', e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
+          onBlur={() => handleBlur('password')}
+          error={fieldErrors.password}
           required
         />
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+        <form onSubmit={handleSearch} className="join-search-row">
           <div style={{ flex: 1 }}>
             <Input
               label="Company name"

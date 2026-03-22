@@ -203,3 +203,140 @@
 
 .radar-placeholder-icon { font-size: 2.5rem; opacity: 0.5; }
 .radar-placeholder-text { text-align: center; line-height: 1.5; }
+
+/* ── Hamburger toggle (hidden on desktop) ── */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 201;
+  background: var(--bg-glass);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* ── Mobile: ≤ 768px ── */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: var(--shadow-md);
+    padding-top: 3.5rem;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .dashboard-main {
+    padding: var(--spacing-lg);
+    padding-top: calc(var(--spacing-lg) + 3rem);
+  }
+
+  .dashboard-greeting {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .member-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .tech-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tech Stack Cards ─────────────────────────────────────────── */
+
+.tech-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.tech-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.tech-card:hover {
+  border-color: rgba(255, 221, 0, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tech-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tech-card-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.tech-card-reasoning {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Readiness Gauge ──────────────────────────────────────────── */
+
+.readiness-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.gauge-title {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0;
+}

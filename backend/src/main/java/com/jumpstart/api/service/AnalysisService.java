@@ -90,7 +90,8 @@ public class AnalysisService {
         sb.append("    \"SALES\": <avg 1-10>,\n");
         sb.append("    \"OPERATIONS\": <avg 1-10>,\n");
         sb.append("    \"DOMAIN\": <avg 1-10>\n");
-        sb.append("  }\n");
+        sb.append("  },\n");
+        sb.append("  \"teamReadinessScore\": <0-100 integer measuring overall team readiness based on skill coverage, gap severity, and role confidence averages>\n");
         sb.append("}");
 
         return sb.toString();
@@ -105,6 +106,7 @@ public class AnalysisService {
             AnalysisResult result = new AnalysisResult();
             result.setStartup(startup);
             result.setSkillHeatmap(root.path("skillHeatmap").toString());
+            result.setTeamReadinessScore(root.path("teamReadinessScore").asInt(0));
             result = analysisResultRepository.save(result);
 
             List<RoleAssignment> assignments = new ArrayList<>();

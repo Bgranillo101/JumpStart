@@ -97,3 +97,29 @@
 .dropdown-item-danger:hover {
   color: var(--accent-error);
 }
+
+/* ── Mobile: ≤ 768px ── */
+@media (max-width: 768px) {
+  .navbar-inner {
+    padding: 0 var(--spacing-md);
+    height: 56px;
+  }
+
+  .navbar-logo svg {
+    width: 96px;
+    height: 32px;
+  }
+
+  .navbar-links {
+    gap: var(--spacing-sm);
+  }
+
+  .navbar-link {
+    font-size: 0.8125rem;
+  }
+
+  .btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+  }
+}

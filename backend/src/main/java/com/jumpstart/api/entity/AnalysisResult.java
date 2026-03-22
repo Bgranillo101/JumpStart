@@ -28,6 +28,8 @@ public class AnalysisResult {
     @Column(columnDefinition = "TEXT")
     private String skillHeatmap; // JSON string: {"technical": 9, "design": 3, ...}
 
+    private Integer teamReadinessScore; // 0-100 team readiness score
+
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "analysisResult", cascade = CascadeType.ALL, orphanRemoval = true)

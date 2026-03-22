@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -7,20 +7,39 @@ import {
 import { Avatar } from '../../components/avatar';
 import { Badge } from '../../components/badge';
 import { Button } from '../../components/buttons';
+import { Toast } from '../../components/Toast';
+import { ReadinessGauge } from '../../components/ReadinessGauge';
+import { OnboardingTour } from '../../components/OnboardingTour';
 import { useAuth } from '../../context/AuthContext';
+import { useSSE } from '../../hooks/useSSE';
 import {
   getTeam, getMembers, getTeamHeatmap, getAnalysisResults, runAnalysis,
-  generateInviteLink,
+  generateInviteLink, getTechStackResults, runTechStackAnalysis,
 } from '../../api';
-import type { Startup, User, AnalysisResult, SkillData } from '../../types';
+import type { Startup, User, AnalysisResult, SkillData, TechStackRecommendation } from '../../types';
 import '../../../css/dashboard.css';
 
 const NAV_LINKS = [
-  { icon: '⬡', label: 'Overview', id: 'overview' },
-  { icon: '👥', label: 'Team', id: 'team' },
-  { icon: '⚡', label: 'Analysis', id: 'analysis' },
-  { icon: '⚙', label: 'Settings', id: 'settings' },
+  { icon: '\u2B21', label: 'Overview', id: 'overview' },
+  { icon: '\uD83D\uDC65', label: 'Team', id: 'team' },
+  { icon: '\u26A1', label: 'Analysis', id: 'analysis' },
+  { icon: '\uD83D\uDD27', label: 'Tech Stack', id: 'techstack' },
+  { icon: '\u2699', label: 'Settings', id: 'settings' },
 ];
+
+const CATEGORY_ICONS: Record<string, string> = {
+  LANGUAGE: '\uD83D\uDCDD',
+  FRAMEWORK: '\uD83C\uDFD7\uFE0F',
+  DATABASE: '\uD83D\uDDC4\uFE0F',
+  TOOL: '\uD83D\uDD27',
+  INFRASTRUCTURE: '\u2601\uFE0F',
+};
+
+const PRIORITY_LABELS: Record<number, string> = {
+  1: 'Must-Have',
+  2: 'Recommended',
+  3: 'Nice-to-Have',
+};
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -36,6 +55,38 @@ export default function DashboardLayout() {
   const [error, setError] = useState('');
   const [inviteLink, setInviteLink] = useState('');
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sprint 2 state
+  const [techStack, setTechStack] = useState<TechStackRecommendation[]>([]);
+  const [generatingTechStack, setGeneratingTechStack] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const heatmapRef = useRef<HTMLDivElement>(null);
+
+  // SSE real-time updates
+  const { latestEvent, clearEvent } = useSSE(startupId);
+
+  // Handle SSE member-joined events
+  useEffect(() => {
+    if (!latestEvent || !startupId) return;
+    const displayName = latestEvent.name || latestEvent.username;
+    setToastMessage(`${displayName} just joined your team!`);
+    setToastVisible(true);
+    clearEvent();
+    // Re-fetch members and heatmap
+    getMembers(startupId).then(setMembers).catch(() => {});
+    getTeamHeatmap(startupId).then(h => {
+      setHeatmapData(
+        h.categories.map(c => ({
+          subject: c.category,
+          value: parseFloat(c.averageProficiency.toFixed(1)),
+          fullMark: 10,
+        }))
+      );
+    }).catch(() => {});
+  }, [latestEvent, startupId, clearEvent]);
 
   useEffect(() => {
     if (!startupId) {
@@ -51,7 +102,8 @@ export default function DashboardLayout() {
       getMembers(startupId),
       getTeamHeatmap(startupId),
       getAnalysisResults(startupId),
-    ]).then(([teamResult, membersResult, heatmapResult, analysisResult]) => {
+      getTechStackResults(startupId),
+    ]).then(([teamResult, membersResult, heatmapResult, analysisResult, techStackResult]) => {
       if (teamResult.status === 'fulfilled') {
         setStartup(teamResult.value);
       } else {
@@ -75,6 +127,10 @@ export default function DashboardLayout() {
       if (analysisResult.status === 'fulfilled') {
         setAnalysis(analysisResult.value);
       }
+
+      if (techStackResult.status === 'fulfilled') {
+        setTechStack(techStackResult.value);
+      }
     }).catch(() => {
       setError('An unexpected error occurred. Please refresh.');
     }).finally(() => {
@@ -96,6 +152,39 @@ export default function DashboardLayout() {
       setAnalyzing(false);
     }
   };
+
+  const handleRunTechStack = async () => {
+    if (!startupId) return;
+    setGeneratingTechStack(true);
+    setError('');
+    try {
+      const result = await runTechStackAnalysis(startupId);
+      setTechStack(result);
+    } catch {
+      setError('Tech stack generation failed. Run a team analysis first.');
+    } finally {
+      setGeneratingTechStack(false);
+    }
+  };
+
+  const handleDownloadReport = useCallback(async () => {
+    if (!analysis || !startup) return;
+    setGeneratingReport(true);
+    try {
+      const { generateReport } = await import('../../utils/generateReport');
+      await generateReport({
+        startup,
+        members,
+        analysis,
+        techStack,
+        heatmapElement: heatmapRef.current,
+      });
+    } catch {
+      setError('Failed to generate report.');
+    } finally {
+      setGeneratingReport(false);
+    }
+  }, [analysis, startup, members, techStack]);
 
   const handleLogout = () => {
     logout();
@@ -121,10 +210,27 @@ export default function DashboardLayout() {
     setTimeout(() => setInviteCopied(false), 2000);
   };
 
+  const handleReplayTour = () => {
+    localStorage.removeItem('jumpstart_tour_completed');
+    window.location.reload();
+  };
+
+  // Group tech stack by category
+  const techStackByCategory = techStack.reduce<Record<string, TechStackRecommendation[]>>((acc, rec) => {
+    (acc[rec.category] ??= []).push(rec);
+    return acc;
+  }, {});
+
   return (
     <div className="dashboard-shell">
+      {/* Mobile hamburger */}
+      <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle menu">
+        {sidebarOpen ? '\u2715' : '\u2630'}
+      </button>
+      <div className={`sidebar-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <Link to="/" className="sidebar-logo">
           <span className="brand-gradient">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.2" viewBox="0 0 1024 337" width="128" height="42">
@@ -133,12 +239,13 @@ export default function DashboardLayout() {
           </span>
         </Link>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" data-tour="sidebar-nav">
           {NAV_LINKS.map(link => (
             <button
               key={link.id}
               className={`sidebar-link ${activeSection === link.id ? 'active' : ''}`}
-              onClick={() => setActiveSection(link.id)}
+              onClick={() => { setActiveSection(link.id); setSidebarOpen(false); }}
+              data-id={link.id}
             >
               <span className="sidebar-link-icon">{link.icon}</span>
               {link.label}
@@ -166,16 +273,34 @@ export default function DashboardLayout() {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <h1 className="dashboard-greeting">
-            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''} 👋
+            Welcome back{currentUser?.username ? `, ${currentUser.username}` : ''} \uD83D\uDC4B
           </h1>
           <p className="dashboard-subtitle">
-            {startup?.name ?? 'Loading your startup…'}
+            {startup?.name ?? 'Loading your startup\u2026'}
           </p>
         </div>
 
         {loading && (
-          <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
-            <p>Loading dashboard…</p>
+          <div className="dashboard-grid">
+            {[1, 2].map(i => (
+              <div key={i} className="skeleton-card">
+                <div className="skeleton skeleton-text lg" />
+                <div className="skeleton skeleton-text" style={{ width: '80%' }} />
+                <div className="skeleton skeleton-text sm" />
+              </div>
+            ))}
+            <div className="skeleton-card" style={{ gridColumn: '1 / -1' }}>
+              <div className="skeleton skeleton-text lg" />
+              {[1, 2, 3].map(i => (
+                <div key={i} className="skeleton-row" style={{ marginBottom: '0.5rem' }}>
+                  <div className="skeleton skeleton-avatar" />
+                  <div style={{ flex: 1 }}>
+                    <div className="skeleton skeleton-text" style={{ width: '50%' }} />
+                    <div className="skeleton skeleton-text sm" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -183,13 +308,12 @@ export default function DashboardLayout() {
           <p style={{ color: 'var(--accent-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>
         )}
 
-        {/* ── Sections (only render when not loading) ───────────────────── */}
         {/* ── Overview ─────────────────────────────────────────────────────── */}
         {!loading && activeSection === 'overview' && (
           <>
             <div className="dashboard-grid">
               {/* Startup overview */}
-              <div className="dash-section-card">
+              <div className="dash-section-card" data-tour="team-overview">
                 <p className="dash-section-title">Team Overview</p>
                 {startup ? (
                   <>
@@ -200,25 +324,43 @@ export default function DashboardLayout() {
                     )}
                   </>
                 ) : (
-                  <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+                  <p style={{ color: 'var(--text-muted)' }}>
+                    {error ? 'Unable to load team data.' : 'Loading\u2026'}
+                  </p>
                 )}
               </div>
 
-              {/* Run analysis CTA */}
+              {/* Readiness score or Analysis CTA */}
               <div className="dash-section-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
-                <p className="dash-section-title">AI Role Analysis</p>
-                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.9rem' }}>
-                  {analysis ? `Last run: ${new Date(analysis.createdAt).toLocaleDateString()}` : 'No analysis run yet.'}
-                </p>
-                <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId}>
-                  {analyzing ? 'Analyzing…' : analysis ? 'Re-run Analysis' : 'Run Analysis'}
+                {analysis?.teamReadinessScore != null ? (
+                  <ReadinessGauge score={analysis.teamReadinessScore} />
+                ) : (
+                  <>
+                    <p className="dash-section-title">AI Role Analysis</p>
+                    <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.9rem' }}>
+                      {analysis ? `Last run: ${new Date(analysis.createdAt).toLocaleDateString()}` : 'No analysis run yet.'}
+                    </p>
+                  </>
+                )}
+                <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId} data-tour="run-analysis">
+                  {analyzing ? 'Analyzing\u2026' : analysis ? 'Re-run Analysis' : 'Run Analysis'}
                 </Button>
               </div>
             </div>
 
             {/* Skill radar */}
-            {heatmapData.length > 0 && (
+            {heatmapData.length === 0 && (
               <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <p className="dash-section-title">Team Skill Heatmap</p>
+                <div className="empty-state">
+                  <span className="empty-state-icon">\uD83D\uDCCA</span>
+                  <span className="empty-state-title">No skill data yet</span>
+                  <span className="empty-state-desc">Team members need to add their skills before the heatmap can be generated.</span>
+                </div>
+              </div>
+            )}
+            {heatmapData.length > 0 && (
+              <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }} ref={heatmapRef}>
                 <p className="dash-section-title">Team Skill Heatmap</p>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={heatmapData}>
@@ -253,7 +395,11 @@ export default function DashboardLayout() {
                   </div>
                 ))}
                 {members.length === 0 && (
-                  <p style={{ color: 'var(--text-secondary)' }}>No members yet.</p>
+                  <div className="empty-state">
+                    <span className="empty-state-icon">\uD83D\uDC65</span>
+                    <span className="empty-state-title">No team members yet</span>
+                    <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -321,7 +467,11 @@ export default function DashboardLayout() {
                 </div>
               ))}
               {members.length === 0 && (
-                <p style={{ color: 'var(--text-secondary)' }}>No members yet.</p>
+                <div className="empty-state">
+                  <span className="empty-state-icon">\uD83D\uDC65</span>
+                  <span className="empty-state-title">No team members yet</span>
+                  <span className="empty-state-desc">Invite people to your startup or have them join with an invite link.</span>
+                </div>
               )}
             </div>
           </div>
@@ -332,14 +482,25 @@ export default function DashboardLayout() {
         {!loading && activeSection === 'analysis' && (
           <>
             {!analysis ? (
-              <div className="dash-section-card" style={{ textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>No analysis results yet.</p>
-                <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId}>
-                  {analyzing ? 'Analyzing…' : 'Run Analysis'}
-                </Button>
+              <div className="dash-section-card">
+                <div className="empty-state">
+                  <span className="empty-state-icon">\u26A1</span>
+                  <span className="empty-state-title">No analysis results yet</span>
+                  <span className="empty-state-desc">Run an AI analysis to get role assignments and identify skill gaps on your team.</span>
+                  <Button variant="primary" size="md" onClick={handleRunAnalysis} disabled={analyzing || !startupId} style={{ marginTop: '0.5rem' }}>
+                    {analyzing ? 'Analyzing\u2026' : 'Run Analysis'}
+                  </Button>
+                </div>
               </div>
             ) : (
               <>
+                {/* Download report button */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                  <Button variant="outline" size="md" onClick={handleDownloadReport} disabled={generatingReport}>
+                    {generatingReport ? 'Generating\u2026' : '\uD83D\uDCC4 Download Report'}
+                  </Button>
+                </div>
+
                 {/* Role assignments */}
                 <div className="dash-section-card" style={{ marginBottom: 'var(--spacing-xl)' }}>
                   <p className="dash-section-title">Role Assignments</p>
@@ -388,17 +549,75 @@ export default function DashboardLayout() {
           </>
         )}
 
+        {/* ── Tech Stack ───────────────────────────────────────────────────── */}
+        {!loading && activeSection === 'techstack' && (
+          <>
+            {techStack.length === 0 ? (
+              <div className="dash-section-card">
+                <div className="empty-state">
+                  <span className="empty-state-icon">\uD83D\uDD27</span>
+                  <span className="empty-state-title">No tech stack recommendations yet</span>
+                  <span className="empty-state-desc">Generate AI-powered technology recommendations based on your team's skills and startup goals.</span>
+                  <Button variant="primary" size="md" onClick={handleRunTechStack} disabled={generatingTechStack || !startupId} style={{ marginTop: '0.5rem' }}>
+                    {generatingTechStack ? 'Generating\u2026' : 'Generate Tech Stack'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h2 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
+                    Recommended Tech Stack
+                  </h2>
+                  <Button variant="outline" size="sm" onClick={handleRunTechStack} disabled={generatingTechStack}>
+                    {generatingTechStack ? 'Regenerating\u2026' : 'Regenerate'}
+                  </Button>
+                </div>
+                {Object.entries(techStackByCategory).map(([category, recs]) => (
+                  <div key={category} style={{ marginBottom: 'var(--spacing-xl)' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
+                      {CATEGORY_ICONS[category] || '\uD83D\uDCE6'} {category}
+                    </p>
+                    <div className="tech-card-grid">
+                      {recs.map(rec => (
+                        <div key={rec.id} className="tech-card">
+                          <div className="tech-card-header">
+                            <span className="tech-card-name">{rec.name}</span>
+                            <Badge variant={rec.priority === 1 ? 'brand' : rec.priority === 2 ? 'tertiary' : 'neutral'}>
+                              {PRIORITY_LABELS[rec.priority] || 'Recommended'}
+                            </Badge>
+                          </div>
+                          <p className="tech-card-reasoning">{rec.reasoning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </>
+        )}
+
         {/* ── Settings ─────────────────────────────────────────────────────── */}
         {!loading && activeSection === 'settings' && (
           <div className="dash-section-card">
             <p className="dash-section-title">Settings</p>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Startup ID: <code>{startupId ?? '—'}</code>
+              Startup ID: <code>{startupId ?? '\u2014'}</code>
             </p>
-            <Button variant="outline" size="md" onClick={handleLogout}>Sign Out</Button>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Button variant="outline" size="md" onClick={handleLogout}>Sign Out</Button>
+              <Button variant="ghost" size="md" onClick={handleReplayTour}>Replay Tour</Button>
+            </div>
           </div>
         )}
       </main>
+
+      {/* Toast notification */}
+      <Toast message={toastMessage} visible={toastVisible} onDismiss={() => setToastVisible(false)} />
+
+      {/* Onboarding tour (first-time users) */}
+      {!loading && <OnboardingTour />}
     </div>
   );
 }

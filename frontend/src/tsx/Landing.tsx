@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../css/landing.css';
 import '../css/cards.css'
 import { Button } from './components/buttons';
@@ -142,8 +142,8 @@ export default function LandingPage() {
           </span>
           <nav className="footer-links">
             <a href="#about" className="footer-link">About</a>
-            <a href="/auth/sign-in" className="footer-link">Sign In</a>
-            <a href="/auth/register" className="footer-link">Register</a>
+            <Link to="/auth/sign-in" className="footer-link">Sign In</Link>
+            <Link to="/auth/register" className="footer-link">Register</Link>
           </nav>
           <span className="footer-copy">© {new Date().getFullYear()} JumpStart. All rights reserved.</span>
         </div>

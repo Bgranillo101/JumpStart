@@ -1,5 +1,6 @@
 package com.jumpstart.api.service;
 
+import com.jumpstart.api.dto.MemberJoinedEvent;
 import com.jumpstart.api.entity.Startup;
 import com.jumpstart.api.entity.User;
 import com.jumpstart.api.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ public class TeamMemberService {
 
     private final StartupRepository startupRepository;
     private final UserRepository userRepository;
+    private final SseService sseService;
 
     @Transactional
     public Startup addMember(Long startupId, Long userId) {
@@ -28,6 +30,9 @@ public class TeamMemberService {
         if (!startup.getMembers().contains(user)) {
             startup.getMembers().add(user);
             startupRepository.save(startup);
+
+            sseService.publish(startupId, "member-joined",
+                    new MemberJoinedEvent(userId, user.getName(), user.getUsername()));
         }
         return startup;
     }

@@ -1,4 +1,4 @@
-import type { Startup, User, AnalysisResult, TeamSkillHeatmap, SkillData, Skill } from '../types';
+import type { Startup, User, AnalysisResult, TeamSkillHeatmap, SkillData, Skill, TechStackRecommendation } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
@@ -214,6 +214,32 @@ export async function joinByInviteCode(code: string): Promise<Startup> {
   });
   if (!res.ok) throw new Error('Invalid or expired invite code');
   return res.json();
+}
+
+// ─── Tech Stack ─────────────────────────────────────────────────────────────
+
+export async function runTechStackAnalysis(startupId: number): Promise<TechStackRecommendation[]> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/tech-stack`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Tech stack analysis failed');
+  return res.json();
+}
+
+export async function getTechStackResults(startupId: number): Promise<TechStackRecommendation[]> {
+  const res = await fetch(`${BASE_URL}/startups/${startupId}/tech-stack`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+// ─── SSE ────────────────────────────────────────────────────────────────────
+
+export function getSSEUrl(startupId: number): string {
+  const token = localStorage.getItem('jwt');
+  return `${BASE_URL}/startups/${startupId}/events?token=${token}`;
 }
 
 // Keep old register signature for any call sites that haven't been updated yet

@@ -15,6 +15,19 @@ const SKILL_CATEGORIES: Skill['category'][] = [
   'TECHNICAL', 'DESIGN', 'MARKETING', 'SALES', 'OPERATIONS', 'DOMAIN',
 ];
 
+function validateEmail(email: string): string {
+  if (!email) return '';
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!re.test(email)) return 'Please enter a valid email address.';
+  return '';
+}
+
+function validatePassword(password: string): string {
+  if (!password) return '';
+  if (password.length < 8) return 'Password must be at least 8 characters.';
+  return '';
+}
+
 export default function CreateProfile() {
   const navigate = useNavigate();
   const { state, setProfileField } = useWizard();
@@ -25,6 +38,7 @@ export default function CreateProfile() {
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const addSkill = () => {
     const trimmed = tagInput.trim();
@@ -42,8 +56,23 @@ export default function CreateProfile() {
     if (file) setProfileField('resumeFile', file);
   };
 
+  const handleBlur = (field: string) => {
+    const errors = { ...fieldErrors };
+    if (field === 'email') errors.email = validateEmail(state.email);
+    if (field === 'password') errors.password = validatePassword(state.password);
+    setFieldErrors(errors);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const emailErr = validateEmail(state.email);
+    const passErr = validatePassword(state.password);
+    if (emailErr || passErr) {
+      setFieldErrors({ email: emailErr, password: passErr });
+      return;
+    }
+
     setError('');
     setLoading(true);
 
@@ -134,7 +163,9 @@ export default function CreateProfile() {
             type="email"
             placeholder="you@example.com"
             value={state.email}
-            onChange={e => setProfileField('email', e.target.value)}
+            onChange={e => { setProfileField('email', e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
+            onBlur={() => handleBlur('email')}
+            error={fieldErrors.email}
             required
           />
           <Input
@@ -142,7 +173,9 @@ export default function CreateProfile() {
             type="password"
             placeholder="••••••••"
             value={state.password}
-            onChange={e => setProfileField('password', e.target.value)}
+            onChange={e => { setProfileField('password', e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
+            onBlur={() => handleBlur('password')}
+            error={fieldErrors.password}
             required
           />
 

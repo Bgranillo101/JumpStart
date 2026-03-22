@@ -49,6 +49,7 @@ export interface AnalysisResult {
   id: number;
   skillHeatmap: string; // JSON string — parse before use
   createdAt: string;
+  teamReadinessScore?: number; // 0-100
   roleAssignments: RoleAssignment[];
   roleGaps: RoleGap[];
 }
@@ -71,11 +72,18 @@ export interface SkillData {
   fullMark?: number;
 }
 
-// Legacy types kept for backward compat during migration
-export interface TechStackItem {
+export interface TechStackRecommendation {
+  id: number;
   name: string;
-  category: string;
-  reason: string;
+  category: string; // LANGUAGE, FRAMEWORK, DATABASE, TOOL, INFRASTRUCTURE
+  reasoning: string;
+  priority: number; // 1=must-have, 2=recommended, 3=nice-to-have
+}
+
+export interface MemberJoinedEvent {
+  userId: number;
+  name: string;
+  username: string;
 }
 
 export type WizardPath = 'create' | 'join';
